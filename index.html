@@ -1,0 +1,3676 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophy Podcast Mind Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #1a1a1a; color: #f0f0f0; margin: 0; overflow: hidden; }
+        #container { display: flex; height: 100vh; }
+        #sidebar { width: 350px; background-color: #2c2c2c; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.5); overflow-y: auto; z-index: 10; }
+        #graph-area { flex-grow: 1; position: relative; }
+        
+        h1 { font-size: 1.2em; color: #61dafb; margin-top: 0; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        
+        .episode-link { display: block; margin: 5px 0; color: #ddd; text-decoration: none; padding: 5px; background: #3a3a3a; border-radius: 4px; }
+        .episode-link:hover { background: #505050; color: #fff; }
+        
+        .sep-link { display: inline-block; margin-top: 10px; color: #ff6b6b; font-weight: bold; text-decoration: none; }
+        .sep-link:hover { text-decoration: underline; }
+
+        .search-container { margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 10px; border-radius: 4px; border: none; background: #444; color: white; }
+        
+        .node circle { stroke: #fff; stroke-width: 1.5px; cursor: pointer; transition: all 0.3s; }
+        .node:hover circle { stroke: #61dafb; stroke-width: 3px; r: 25 !important; }
+        .node text { font: 10px sans-serif; pointer-events: none; fill: #eee; text-shadow: 1px 1px 2px #000; }
+        
+        .link { fill: none; stroke: #555; stroke-opacity: 0.6; marker-end: url(#arrow); }
+        
+        /* Category Colors */
+        .cat-Ancient { fill: #ff9f43; }
+        .cat-Medieval { fill: #feca57; }
+        .cat-Modern { fill: #ff6b6b; }
+        .cat-19th_Century { fill: #ff9ff3; }
+        .cat-Analytic { fill: #54a0ff; }
+        .cat-Continental { fill: #00d2d3; }
+        .cat-Phenomenology { fill: #1dd1a1; }
+        .cat-Existentialism { fill: #10ac84; }
+        .cat-Eastern { fill: #5f27cd; }
+        .cat-Topic { fill: #c8d6e5; }
+        .cat-Literature { fill: #8395a7; }
+
+        #dependency-list { margin-top: 15px; font-size: 0.9em; color: #aaa; }
+        .dep-item { color: #61dafb; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <div id="sidebar">
+        <h1>PEL Mind Map</h1>
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search philosopher or topic...">
+        </div>
+        <div id="details">
+            <p><i>Click a node to view episodes and details.</i></p>
+        </div>
+    </div>
+    <div id="graph-area"></div>
+</div>
+
+<script>
+    // --- Data Injection ---
+    const rawData = [
+  {
+    "id": "presocratics",
+    "name": "Pre-Socratics",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/presocratics/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 198 Follow-Up: More on Plato\u2019s \u201cParmenides\u201d (Citizens Only)",
+        "link": "https://www.patreon.com/posts/ep-198-follow-up-21393473"
+      },
+      {
+        "title": "Ep. 198: Plato\u2019s Forms in the \u201cParmenides\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-198-platos-in-21178125"
+      },
+      {
+        "title": "Ep. 197: Parmenides on What There Is (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-197-on-what-20915665"
+      },
+      {
+        "title": "Ep. 79: Heraclitus on Understanding the World",
+        "link": "https://www.patreon.com/posts/ep-79-heraclitus-27507479"
+      }
+    ]
+  },
+  {
+    "id": "nietzsche",
+    "name": "Friedrich Nietzsche",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/nietzsche/",
+    "dependencies": [
+      "schopenhauer",
+      "wagner",
+      "presocratics"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 300: Nietzsche on Relating to History (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-300-nietzsche-72491736"
+      },
+      {
+        "title": "Ep. 300: Nietzsche on Relating to History (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-300-nietzsche-71787618"
+      },
+      {
+        "title": "Ep. 300: Nietzsche on Relating to History (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-300-nietzsche-71787631"
+      },
+      {
+        "title": "Ep. 262: Nietzsche on Self-Denial (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-262-nietzsche-47200033"
+      },
+      {
+        "title": "Ep. 262: Nietzsche on Self-Denial (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-262-nietzsche-46964471"
+      },
+      {
+        "title": "Episode 214: More Nietzsche\u2019s Zarathustra (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/episode-214-more-26450518"
+      },
+      {
+        "title": "Ep. 213: Nietzsche\u2019s Zarathustra (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-213-citizen-26121232"
+      },
+      {
+        "title": "Ep. 178: Nietzsche as Social Critic: \u201cTwilight of the Idols\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-178-nietzsche-15699758"
+      },
+      {
+        "title": "Ep. 119 Aftershow: Nietzsche (Featuring Greg Sadler)",
+        "link": "https://www.patreon.com/posts/ep-119-aftershow-50276075"
+      },
+      {
+        "title": "Ep. 119: Nietzsche on Tragedy and the Psychology of Art (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-119-nietzsche-50275914"
+      },
+      {
+        "title": "Ep. 84: Netzsche\u2019s \u201cGay Science\u201d",
+        "link": "https://www.patreon.com/posts/ep-84-netzsches-27526646"
+      },
+      {
+        "title": "Ep. 11: Nietzsche\u2019s Immoralism: What Is Ethics, Anyway?",
+        "link": "https://www.patreon.com/posts/ep-11-nietzsches-30313414"
+      }
+    ]
+  },
+  {
+    "id": "nozick",
+    "name": "Robert Nozick",
+    "category": "Political Phil",
+    "sep_link": "https://plato.stanford.edu/entries/nozick-political/",
+    "dependencies": [
+      "locke",
+      "rawls"
+    ],
+    "episodes": [
+      {
+        "title": "Precognition of Ep. 104: Robert Nozick",
+        "link": "https://www.patreon.com/posts/precognition-of-50223006"
+      },
+      {
+        "title": "Ep. 104: Robert Nozick\u2019s Libertarianism (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-104-robert-50223578"
+      }
+    ]
+  },
+  {
+    "id": "brentano",
+    "name": "Franz Brentano",
+    "category": "Phenomenology",
+    "sep_link": "https://plato.stanford.edu/entries/brentano/",
+    "dependencies": [
+      "aristotle"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 363: Franz Brentano's Moral Epistemology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-363-franz-two-124444244"
+      },
+      {
+        "title": "Ep. 363: Franz Brentano's Moral Epistemology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-363-franz-one-124444025"
+      }
+    ]
+  },
+  {
+    "id": "lakatos",
+    "name": "Imre Lakatos",
+    "category": "Phil of Science",
+    "sep_link": "https://plato.stanford.edu/entries/lakatos/",
+    "dependencies": [
+      "popper",
+      "kuhn"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 280: Imre Lakatos on Scientific Progress (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-280-imre-on-57840791"
+      },
+      {
+        "title": "Ep. 280: Imre Lakatos on Scientific Progress (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-280-imre-on-57840687"
+      }
+    ]
+  },
+  {
+    "id": "shakespeare",
+    "name": "William Shakespeare",
+    "category": "Literature",
+    "sep_link": "",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 299: Philosophy in Shakespeare's \"Timon of Athens\" (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-299-in-timon-71050566"
+      },
+      {
+        "title": "Ep. 299: Philosophy in Shakespeare\u2019s \u201cTimon of Athens\u201d (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-299-in-timon-70855495"
+      },
+      {
+        "title": "Ep. 299: Philosophy in Shakespeare's \"Timon of Athens\" (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-299-in-timon-70854273"
+      },
+      {
+        "title": "Shakespeare\u2019s \u201cTimon of Athens\u201d Audioplay (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/shakespeares-of-70200847"
+      },
+      {
+        "title": "Shakespeare\u2019s \u201cTimon of Athens\u201d Audioplay Feat. Jay O. Sanders, Michael Ian Black, and Michael Tow (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/shakespeares-of-70200820"
+      },
+      {
+        "title": "(sub)Text #1: Poesis as Revenge Forsaken in Shakespeare's \"The Tempest\" (Citizens Only)",
+        "link": "https://www.patreon.com/posts/sub-text-1-as-in-20219595"
+      }
+    ]
+  },
+  {
+    "id": "plato",
+    "name": "Plato",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/plato/",
+    "dependencies": [
+      "socrates"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 376: Plato\u2019s \u201cLaws\u201d (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-376-platos-139356822"
+      },
+      {
+        "title": "Ep. 376: Plato\u2019s \u201cLaws\u201d (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-376-platos-139352860"
+      },
+      {
+        "title": "Ep. 343: Plotinus the Neo-Platonist (Part Three for Supporters/Closereads Audio Part One)",
+        "link": "https://www.patreon.com/posts/ep-343-plotinus-106500105"
+      },
+      {
+        "title": "Ep. 343: Plotinus the Neo-Platonist (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-343-plotinus-106076423"
+      },
+      {
+        "title": "Ep. 343: Plotinus the Neo-Platonist (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-343-plotinus-105881791"
+      },
+      {
+        "title": "Closereads: Aristotle Against Platonic Forms (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-forms-98529122"
+      },
+      {
+        "title": "Closereads: Aristotle Against Platonic Forms (Audio Part One), aka PEL Ep. 335 (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/closereads-forms-98156973"
+      },
+      {
+        "title": "Closereads: Forms in Plato's \"Republic\" (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-forms-89982003"
+      },
+      {
+        "title": "Closereads: Forms in Plato's \"Republic\" (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-forms-89775544"
+      },
+      {
+        "title": "Ep. 324: Plato's \"Cratylus\" on Language (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-324-platos-on-88976349"
+      },
+      {
+        "title": "Ep. 324: Plato's \"Cratylus\" on Language (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-324-platos-on-88663356"
+      },
+      {
+        "title": "Ep. 324: Plato's \"Cratylus\" on Language (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-324-platos-on-88663358"
+      },
+      {
+        "title": "Ep. 275: Hegel's Project in \"The Phenomenology of Spirit\" (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-275-hegels-in-54314201"
+      },
+      {
+        "title": "Ep. 275: Hegel's Project in \"The Phenomenology of Spirit\" (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-275-hegels-in-54314143"
+      },
+      {
+        "title": "Ep. 149: Plato\u2019s \u201cCrito\u201d: A Performance and Discussion (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-149-platos-50939081"
+      },
+      {
+        "title": "Ep. 143: Plato\u2019s \u201cSophist\u201d on Lies, Categorization, and Non-Being (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-143-platos-on-50891432"
+      },
+      {
+        "title": "Ep. 142: Plato\u2019s \u201cPhaedrus\u201d on Love and Speechmaking (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-142-platos-on-50891288"
+      },
+      {
+        "title": "Ep. 266: Jonathan Lear's Plato: Psyche and Society (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-266-jonathan-49343589"
+      },
+      {
+        "title": "Ep. 266: Jonathan Lear's Plato: Psyche and Society (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-266-jonathan-49343577"
+      },
+      {
+        "title": "Ep. 265: Plato's \"Phaedo\": Philosophy as Training for Death (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-265-platos-as-48780445"
+      },
+      {
+        "title": "Ep. 265: Plato's \"Phaedo\": Philosophy as Training for Death (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-265-platos-as-48778010"
+      },
+      {
+        "title": "Ep. 264: Plato\u2019s \u201cTimaeus\u201d on Cosmology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-264-platos-on-48193101"
+      },
+      {
+        "title": "Ep. 264: Plato\u2019s \u201cTimaeus\u201d on Cosmology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-264-platos-on-48193086"
+      },
+      {
+        "title": "Ep. 233: Plato\u2019s \u201cProtagoras\u201d on Virtue (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-233-platos-on-32916753"
+      },
+      {
+        "title": "Ep. 100: Plato\u2019s Symposium Live Celebration!",
+        "link": "https://www.patreon.com/posts/ep-100-platos-33200350"
+      },
+      {
+        "title": "Ep. 69: Plato on Rhetoric vs. Philosophy",
+        "link": "https://www.patreon.com/posts/ep-69-plato-on-17046616"
+      },
+      {
+        "title": "Not Ep 69: \u201cGorgias\u201d Full Cast Audioplay (Part Two)",
+        "link": "https://www.patreon.com/posts/not-ep-69-full-62067159"
+      },
+      {
+        "title": "Not Episode 69: PEL Players Full Cast Audiobook of Plato\u2019s \u201cGorgias\u201d (part 1)",
+        "link": "https://www.patreon.com/posts/not-episode-69-1-62066964"
+      },
+      {
+        "title": "Ep. 46: Plato on Ethics &Religion",
+        "link": "https://www.patreon.com/posts/ep-46-plato-on-15467712"
+      },
+      {
+        "title": "Ep. 40: Plato\u2019s Republic: What Is Justice?",
+        "link": "https://www.patreon.com/posts/ep-40-platos-is-15462680"
+      },
+      {
+        "title": "Ep. 31: Husserl\u2019s Phenomenology",
+        "link": "https://www.patreon.com/posts/ep-31-husserls-11381067"
+      },
+      {
+        "title": "Ep. 18: Plato: What Is Knowledge?",
+        "link": "https://www.patreon.com/posts/ep-18-plato-what-11380493"
+      }
+    ]
+  },
+  {
+    "id": "dostoevsky",
+    "name": "Fyodor Dostoevsky",
+    "category": "Literature",
+    "sep_link": "https://plato.stanford.edu/entries/dostoevsky/",
+    "dependencies": [
+      "existentialism"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 317: Character Philosophies in Dostoevsky's \"Brothers Karamazov\" (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-317-character-82998406"
+      },
+      {
+        "title": "Ep. 317: Character Philosophies in Dostoevsky's \"Brothers Karamazov\" (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-317-character-82998403"
+      },
+      {
+        "title": "Ep. 316: Dostoevsky's \"Brothers Karamazov\": PEL Live in NYC (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-316-brothers-82284946"
+      }
+    ]
+  },
+  {
+    "id": "badiou",
+    "name": "Alain Badiou",
+    "category": "Continental",
+    "sep_link": "https://plato.stanford.edu/entries/badiou/",
+    "dependencies": [
+      "sartre",
+      "lacan",
+      "marx"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 283: Alain Badiou on Love (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-283-alain-on-59547761"
+      },
+      {
+        "title": "Ep. 283: Alain Badiou on Love (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-283-alain-on-59547537"
+      },
+      {
+        "title": "Ep. 282: Alain Badiou: What Is Philosophy? (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-282-alain-is-58990296"
+      },
+      {
+        "title": "Ep. 282: Alain Badiou: What Is Philosophy? (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-282-alain-is-58990290"
+      }
+    ]
+  },
+  {
+    "id": "spinoza",
+    "name": "Baruch Spinoza",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/spinoza/",
+    "dependencies": [
+      "descartes",
+      "hobbes"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Spinoza on Emotions (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-131310917"
+      },
+      {
+        "title": "Closereads: Spinoza on Emotions (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-130774829"
+      },
+      {
+        "title": "Closereads: Hegel on Spinoza (Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-87557057"
+      },
+      {
+        "title": "Closereads: Hegel on Spinoza (Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-87443405"
+      },
+      {
+        "title": "Closereads: Hegel on Spinoza (Part One)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-87353667"
+      },
+      {
+        "title": "Ep. 165: Spinoza on Biblical Criticism (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-165-spinoza-52067872"
+      },
+      {
+        "title": "Ep. 25: Spinoza on Human Nature",
+        "link": "https://www.patreon.com/posts/ep-25-spinoza-on-11380247"
+      }
+    ]
+  },
+  {
+    "id": "santayana",
+    "name": "George Santayana",
+    "category": "Naturalism",
+    "sep_link": "https://plato.stanford.edu/entries/santayana/",
+    "dependencies": [
+      "spinoza",
+      "james"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 77: Santayana on the Appreciation of Beauty",
+        "link": "https://www.patreon.com/posts/ep-77-santayana-27506227"
+      }
+    ]
+  },
+  {
+    "id": "foot",
+    "name": "Philippa Foot",
+    "category": "Ethics",
+    "sep_link": "https://plato.stanford.edu/entries/foot-philippa/",
+    "dependencies": [
+      "aristotle",
+      "aquinas"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 369: Philippa Foot's Naturalistic Ethics (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-369-philippa-131959500"
+      },
+      {
+        "title": "Ep. 369: Philippa Foot's Naturalistic Ethics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-369-philippa-131413167"
+      },
+      {
+        "title": "Ep. 369: Philippa Foot's Naturalistic Ethics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-369-philippa-131413065"
+      }
+    ]
+  },
+  {
+    "id": "buber",
+    "name": "Martin Buber",
+    "category": "Existentialism",
+    "sep_link": "https://plato.stanford.edu/entries/buber/",
+    "dependencies": [
+      "kierkegaard"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 71: Martin Buber\u2019s \u201cI and Thou\u201d",
+        "link": "https://www.patreon.com/posts/ep-71-martin-i-17046654"
+      }
+    ]
+  },
+  {
+    "id": "laozi",
+    "name": "Laozi",
+    "category": "Eastern",
+    "sep_link": "https://plato.stanford.edu/entries/laozi/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 341: Guest Karyn Lai on Daoism in the Zhuangzi (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-341-guest-lai-104091587"
+      },
+      {
+        "title": "Ep. 312: The Dao De Jing on Virtue (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-312-dao-de-on-79594660"
+      },
+      {
+        "title": "Ep. 312: The Dao De Jing on Virtue (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-312-dao-de-on-79594662"
+      },
+      {
+        "title": "Ep. 311: Understanding the Dao De Jing (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-311-dao-de-78938491"
+      },
+      {
+        "title": "Ep. 311: Understanding the Dao De Jing (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-311-dao-de-78938493"
+      }
+    ]
+  },
+  {
+    "id": "deleuze",
+    "name": "Gilles Deleuze",
+    "category": "Post-Structuralism",
+    "sep_link": "https://plato.stanford.edu/entries/deleuze/",
+    "dependencies": [
+      "nietzsche",
+      "spinoza",
+      "bergson"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 76: Deleuze on What Philosophy Is",
+        "link": "https://www.patreon.com/posts/ep-76-deleuze-on-17046823"
+      }
+    ]
+  },
+  {
+    "id": "whitehead",
+    "name": "Alfred North Whitehead",
+    "category": "Process Phil",
+    "sep_link": "https://plato.stanford.edu/entries/whitehead/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 110 Aftershow: Whitehead on Nature",
+        "link": "https://www.patreon.com/posts/ep-110-aftershow-50228168"
+      },
+      {
+        "title": "Precognition of Ep. 110: Whitehead",
+        "link": "https://www.patreon.com/posts/precognition-of-50228008"
+      },
+      {
+        "title": "Ep. 110: Alfred North Whitehead: What Is Nature? (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-110-alfred-is-50228091"
+      }
+    ]
+  },
+  {
+    "id": "langer",
+    "name": "Susanne Langer",
+    "category": "Aesthetics",
+    "sep_link": "https://plato.stanford.edu/entries/langer/",
+    "dependencies": [
+      "cassirer",
+      "whitehead"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 292: Langer on Symbolic Music (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-292-langer-on-65563359"
+      },
+      {
+        "title": "Ep. 292: Langer on Symbolic Music (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-292-langer-on-65563358"
+      },
+      {
+        "title": "Ep. 291: Cassirer and Langer on Myth and Ritual (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-291-cassirer-65016343"
+      },
+      {
+        "title": "Ep. 291: Cassirer and Langer on Myth and Ritual (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-291-cassirer-65016318"
+      },
+      {
+        "title": "Ep. 290: Susanne Langer on Our Symbol-Making Nature (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-290-susanne-64300117"
+      },
+      {
+        "title": "Ep. 290: Susanne Langer on Our Symbol-Making Nature (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-290-susanne-64300111"
+      }
+    ]
+  },
+  {
+    "id": "hegel",
+    "name": "G.W.F. Hegel",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/hegel/",
+    "dependencies": [
+      "kant",
+      "fichte",
+      "schelling"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Hegel on Reason (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-145093162"
+      },
+      {
+        "title": "Closereads: Hegel on Reason (Audio Part Three) ",
+        "link": "https://www.patreon.com/posts/closereads-hegel-144534853"
+      },
+      {
+        "title": "Closereads: Hegel on Reason (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-144022960"
+      },
+      {
+        "title": "Closereads: Hegel on Reason (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-143579601"
+      },
+      {
+        "title": "Seminar for Hegel's \"Preface\": Raw Audio for Big Spenders",
+        "link": "https://www.patreon.com/posts/seminar-for-raw-56109436"
+      },
+      {
+        "title": "REISSUE-Ep 35: Hegel on Self-Consciousness (Ad Free w/ New Intro)",
+        "link": "https://www.patreon.com/posts/reissue-ep-35-on-56105230"
+      },
+      {
+        "title": "Ep. 277: Hegel on Our Understanding of Physics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-277-hegel-on-55526169"
+      },
+      {
+        "title": "Ep. 277: Hegel on Our Understanding of Physics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-277-hegel-on-55526102"
+      },
+      {
+        "title": "Ep. 276: Hegel on Perception (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-276-hegel-on-54926048"
+      },
+      {
+        "title": "Ep. 276: Hegel on Perception (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-276-hegel-on-54925954"
+      },
+      {
+        "title": "Ep.134/135 Aftershow on Hegel\u2019s \u201cLogic\u201d feat. Chris Yeomans",
+        "link": "https://www.patreon.com/posts/ep-134-135-on-50807881"
+      },
+      {
+        "title": "Ep. 135: Hegel on the Logic of Basic Metaphysical Concepts (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-135-hegel-on-50807740"
+      },
+      {
+        "title": "Ep. 134: Hegel on Thought &World (or \u201cLogic\u201d) (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-134-hegel-on-50807546"
+      },
+      {
+        "title": "Ep. 36: More Hegel on Self-Consciousness",
+        "link": "https://www.patreon.com/posts/ep-36-more-hegel-15462576"
+      },
+      {
+        "title": "Ep. 35: Hegel on Self-Consciousness",
+        "link": "https://www.patreon.com/posts/ep-35-hegel-on-15462555"
+      },
+      {
+        "title": "Ep. 15: Hegel on History",
+        "link": "https://www.patreon.com/posts/ep-15-hegel-on-30313561"
+      }
+    ]
+  },
+  {
+    "id": "reid",
+    "name": "Thomas Reid",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/reid/",
+    "dependencies": [
+      "hume",
+      "locke"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 353: Reid on Visual Knowledge (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-353-reid-on-114378910"
+      },
+      {
+        "title": "Ep. 353: Reid on Visual Knowledge (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-353-reid-on-114378902"
+      },
+      {
+        "title": "Ep. 352: Thomas Reid on Smelling and Knowledge (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-352-thomas-on-113515522"
+      },
+      {
+        "title": "Ep. 352: Thomas Reid on Smelling and Knowledge (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-352-thomas-on-113513216"
+      }
+    ]
+  },
+  {
+    "id": "epicureanism",
+    "name": "Epicureanism",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/epicureanism/",
+    "dependencies": [
+      "presocratics"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 208: Epicurus on Seeking Pleasure (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-208-epicurus-24282468"
+      },
+      {
+        "title": "Ep. 206: Lucretius\u2019s Epicurean Physics (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-206-epicurean-23995157"
+      },
+      {
+        "title": "Ep. 206 Follow-Up Lucretius's Epicurean Physics (Citizens Only)",
+        "link": "https://www.patreon.com/posts/ep-206-follow-up-23982236"
+      }
+    ]
+  },
+  {
+    "id": "machiavelli",
+    "name": "Machiavelli",
+    "category": "Renaissance",
+    "sep_link": "https://plato.stanford.edu/entries/machiavelli/",
+    "dependencies": [],
+    "episodes": []
+  },
+  {
+    "id": "descartes",
+    "name": "Ren\u00e9 Descartes",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/descartes/",
+    "dependencies": [
+      "augustine",
+      "skepticism"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Descartes' \"Passions of the Soul\" (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-of-102601181"
+      },
+      {
+        "title": "Closereads: Descartes' \"Passions of the Soul\" (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-of-101716548"
+      },
+      {
+        "title": "Closereads: Descartes' \"Passions of the Soul\" (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-of-101320104"
+      },
+      {
+        "title": "Closereads: Descartes' \"Passions of the Soul\" (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-of-100953397"
+      },
+      {
+        "title": "Ep. 231: Descartes\u2019s \u201cDiscourse\u201d on Wisdom and Certainty (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-231-discourse-32241097"
+      },
+      {
+        "title": "Ep. 229: Descartes\u2019s Rules for Thinking (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-229-rules-for-31306393"
+      },
+      {
+        "title": "Ep. 2: Descartes\u2019s Meditations: What Can We Know?",
+        "link": "https://www.patreon.com/posts/ep-2-descartess-30313019"
+      }
+    ]
+  },
+  {
+    "id": "terrorism",
+    "name": "Terrorism",
+    "category": "Topic",
+    "sep_link": "https://plato.stanford.edu/entries/terrorism/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 72: Terrorism with Jonathan R. White",
+        "link": "https://www.patreon.com/posts/ep-72-terrorism-17046752"
+      }
+    ]
+  },
+  {
+    "id": "aquinas",
+    "name": "Thomas Aquinas",
+    "category": "Medieval",
+    "sep_link": "https://plato.stanford.edu/entries/aquinas/",
+    "dependencies": [
+      "aristotle",
+      "augustine"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 381: Aquinas on Ethical Psychology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-381-aquinas-145243026"
+      },
+      {
+        "title": "Ep. 378: Aquinas on God and Mind (Part Four for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-378-aquinas-142702723"
+      },
+      {
+        "title": "Ep. 378: Aquinas on God and Mind (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-378-aquinas-142117602"
+      },
+      {
+        "title": "Ep. 378: Aquinas on God and Mind (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-378-aquinas-141584408"
+      },
+      {
+        "title": "Ep. 378: Aquinas on God and Mind (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-378-aquinas-141584400"
+      }
+    ]
+  },
+  {
+    "id": "cassirer",
+    "name": "Ernst Cassirer",
+    "category": "Neo-Kantian",
+    "sep_link": "https://plato.stanford.edu/entries/cassirer/",
+    "dependencies": [
+      "kant"
+    ],
+    "episodes": []
+  },
+  {
+    "id": "mccarthy",
+    "name": "Cormac McCarthy",
+    "category": "Literature",
+    "sep_link": "",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 305: Cormac McCarthy's \"Blood Meridian\" (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-305-cormac-75518677"
+      },
+      {
+        "title": "Ep. 305: Cormac McCarthy's \"Blood Meridian\" (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-305-cormac-75143246"
+      },
+      {
+        "title": "Ep. 305: Cormac McCarthy\u2019s \u201cBlood Meridian\u201d (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-305-cormac-75143245"
+      },
+      {
+        "title": "Ep. 63: Existentialist Heroes in Cormac McCarthy\u2019s \u201cNo Country for Old Men\u201d",
+        "link": "https://www.patreon.com/posts/ep-63-heroes-in-17045819"
+      }
+    ]
+  },
+  {
+    "id": "russell",
+    "name": "Bertrand Russell",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/russell/",
+    "dependencies": [
+      "leibniz",
+      "frege",
+      "moore"
+    ],
+    "episodes": [
+      {
+        "title": "Audiobook: Bertrand Russell\u2019s \u201cOn Denoting\u201d",
+        "link": "https://www.patreon.com/posts/audiobook-on-70797110"
+      },
+      {
+        "title": "Ep. 38: Bertrand Russell on Math and Logic",
+        "link": "https://www.patreon.com/posts/ep-38-bertrand-15462639"
+      }
+    ]
+  },
+  {
+    "id": "aristotle",
+    "name": "Aristotle",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/aristotle/",
+    "dependencies": [
+      "plato"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Aquinas and Aristotle on Soul (Audio) ",
+        "link": "https://www.patreon.com/posts/closereads-and-142428197"
+      },
+      {
+        "title": "Closereads: Aristotle on Final Causes (Audio)",
+        "link": "https://www.patreon.com/posts/closereads-on-140846851"
+      },
+      {
+        "title": "Ep. 339: Brian Ellis on the Metaphysics of Science (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-339-brian-on-101920422"
+      },
+      {
+        "title": "Ep. 339: Brian Ellis on the Metaphysics of Science (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-339-brian-on-101920316"
+      },
+      {
+        "title": "Ep. 338: Aristotle on Potential vs. Actual and the Unmoved Mover (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-338-aristotle-100972176"
+      },
+      {
+        "title": "Ep. 338: Aristotle on Potential vs. Actual and the Unmoved Mover (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-338-aristotle-100971632"
+      },
+      {
+        "title": "Ep. 337: Aristotle on Primary Being (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-337-aristotle-100135177"
+      },
+      {
+        "title": "Ep. 337: Aristotle on Primary Being (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-337-aristotle-100113781"
+      },
+      {
+        "title": "Ep. 336: Aristotle on Being and Non-Contradiction (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-336-aristotle-99155758"
+      },
+      {
+        "title": "Ep. 336: Aristotle on Being and Non-Contradiction (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-336-aristotle-99155611"
+      },
+      {
+        "title": "Ep. 335: Aristotle on Fundamental Explanations (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-335-aristotle-98156263"
+      },
+      {
+        "title": "Ep. 335: Aristotle on Fundamental Explanations (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-335-aristotle-98156258"
+      },
+      {
+        "title": "Ep. 328: Yascha Mounk Against Identity Politics (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-328-yascha-92390665"
+      },
+      {
+        "title": "Ep. 328: Guest Yascha Mounk Against Identity Politics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-328-guest-two-91840874"
+      },
+      {
+        "title": "Ep. 328: Guest Yascha Mounk Against Identity Politics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-328-guest-one-91794964"
+      },
+      {
+        "title": "Ep. 279: Aristotle's \"Categories\" of Being (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-279-of-being-57212461"
+      },
+      {
+        "title": "Ep. 279: Aristotle's \"Categories\" of Being (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-279-of-being-57212449"
+      },
+      {
+        "title": "Ep. 166: Spinoza on Politics and Religion (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-166-spinoza-52067976"
+      },
+      {
+        "title": "Ep. 157: Richard Rorty on Politics for the Left (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-157-richard-50993219"
+      },
+      {
+        "title": "Ep. 156: Philosophy and Politics Free-Form Discussion (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-156-and-free-50993118"
+      },
+      {
+        "title": "Ep. 148: Aristotle on Friendship and Happiness (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-148-aristotle-50938938"
+      },
+      {
+        "title": "Ep. 147: Aristotle on Wisdom and Incontinence (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-147-aristotle-50938838"
+      },
+      {
+        "title": "Ep. 130/131 Aftershow on Aristotle\u2019s \u201cDe Anima\u201d feat. Rebecca Goldner",
+        "link": "https://www.patreon.com/posts/ep-130-131-on-de-50466488"
+      },
+      {
+        "title": "Ep. 131: Aristotle\u2019s \u201cDe Anima\u201d: What Is the Mind? (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-131-de-anima-50466375"
+      },
+      {
+        "title": "Ep. 130: Aristotle\u2019s \u201cDe Anima\u201d: What Is Life? (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-130-de-anima-50466251"
+      },
+      {
+        "title": "Ep. 122: Augustine on Mind and Metaphysics (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-122-augustine-50298475"
+      },
+      {
+        "title": "Ep. 247: Aristotle on Rhetoric and Emotions (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-247-aristotle-39035010"
+      },
+      {
+        "title": "Ep. 243: Aristotle\u2019s \u201cPoetics\u201d on Art and Tragedy (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-243-poetics-36995524"
+      },
+      {
+        "title": "Episode 216: Game of Thrones\u2019 Fantasy Politics (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/episode-216-game-27073213"
+      },
+      {
+        "title": "Episode 209: Guest Francis Fukuyama on Identity Politics (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/episode-209-on-24613650"
+      },
+      {
+        "title": "Bonus Discussion: Identity Politics Preliminaries (Citizens Only)",
+        "link": "https://www.patreon.com/posts/bonus-discussion-19023317"
+      },
+      {
+        "title": "Ep. 188: Discussing \u201cLysistrata\u201d and Politics with Lucy and Emily (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-188-and-with-18352949"
+      },
+      {
+        "title": "Ep. 114 Aftershow: Schopenhauer\u2019s Metaphysics",
+        "link": "https://www.patreon.com/posts/ep-114-aftershow-50234060"
+      },
+      {
+        "title": "Ep. 92: Henri Bergson on How to Do Metaphysics (w/ Matt Teichman Intro)",
+        "link": "https://www.patreon.com/posts/ep-92-henri-on-w-30346202"
+      },
+      {
+        "title": "Ep. 60: Aristotle: What\u2019s the Best Form of Government?",
+        "link": "https://www.patreon.com/posts/ep-60-aristotle-17045721"
+      },
+      {
+        "title": "Ep. 24: Spinoza on God and Metaphysics",
+        "link": "https://www.patreon.com/posts/ep-24-spinoza-on-11380107"
+      },
+      {
+        "title": "Ep. 14: Machiavelli on Politics",
+        "link": "https://www.patreon.com/posts/ep-14-on-30313524"
+      },
+      {
+        "title": "Ep. 5: Aristotle\u2019s Nichomachean Ethics",
+        "link": "https://www.patreon.com/posts/ep-5-aristotles-30313147"
+      }
+    ]
+  },
+  {
+    "id": "habermas",
+    "name": "J\u00fcrgen Habermas",
+    "category": "Critical Theory",
+    "sep_link": "https://plato.stanford.edu/entries/habermas/",
+    "dependencies": [
+      "adorno",
+      "horkheimer",
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 252: Habermas on Communication as Sociality (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-252-habermas-41592827"
+      },
+      {
+        "title": "Ep. 252: Habermas on Communication as Sociality (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-252-habermas-41592656"
+      }
+    ]
+  },
+  {
+    "id": "austin",
+    "name": "J.L. Austin",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/austin/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 186: J.L. Austin on Doing Things with Words (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-186-j-l-on-17643711"
+      }
+    ]
+  },
+  {
+    "id": "rawls",
+    "name": "John Rawls",
+    "category": "Political Phil",
+    "sep_link": "https://plato.stanford.edu/entries/rawls/",
+    "dependencies": [
+      "kant",
+      "locke",
+      "rousseau"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 85: Rawls on Social Justice (w/ Seth Intro)",
+        "link": "https://www.patreon.com/posts/ep-85-rawls-on-w-30336771"
+      }
+    ]
+  },
+  {
+    "id": "gita",
+    "name": "Bhagavad Gita",
+    "category": "Eastern",
+    "sep_link": "",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Episode 204: The Bhagavad Gita\u2019s Hindu Theology (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/episode-204-23096992"
+      }
+    ]
+  },
+  {
+    "id": "erasmus",
+    "name": "Erasmus",
+    "category": "Renaissance",
+    "sep_link": "https://plato.stanford.edu/entries/erasmus/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 302: Erasmus Praises Foolishness (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-302-erasmus-73647062"
+      },
+      {
+        "title": "Ep. 302: Erasmus Praises Foolishness (Part Two for Supporters)\u00a0",
+        "link": "https://www.patreon.com/posts/ep-302-erasmus-73338406"
+      },
+      {
+        "title": "Ep. 302: Erasmus Praises Foolishness (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-302-erasmus-73338411"
+      }
+    ]
+  },
+  {
+    "id": "foucault",
+    "name": "Michel Foucault",
+    "category": "Post-Structuralism",
+    "sep_link": "https://plato.stanford.edu/entries/foucault/",
+    "dependencies": [
+      "nietzsche",
+      "heidegger",
+      "marx"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 245: Fashion (Derrida, Foucault, Sontag) w/ Shahidha Bari (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-245-fashion-w-38089727"
+      },
+      {
+        "title": "Ep. 189: Authorial Intent (Barthes, Foucault, Beardsley, et al) (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-189-authorial-18660236"
+      },
+      {
+        "title": "Ep. 49: Foucault on Power and Punishment",
+        "link": "https://www.patreon.com/posts/ep-49-foucault-15467795"
+      }
+    ]
+  },
+  {
+    "id": "fichte",
+    "name": "J.G. Fichte",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/johann-fichte/",
+    "dependencies": [
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 272: Fichte\u2019s Idealist Theology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-272-fichtes-52756853"
+      },
+      {
+        "title": "Ep. 272: Fichte\u2019s Idealist Theology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-272-fichtes-52756763"
+      },
+      {
+        "title": "Ep. 271: Johan Gottlieb Fichte\u2019s Transcendental Idealism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-271-johan-two-52190727"
+      },
+      {
+        "title": "Ep. 271: Johan Gottlieb Fichte\u2019s Transcendental Idealism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-271-johan-one-52190627"
+      }
+    ]
+  },
+  {
+    "id": "schopenhauer",
+    "name": "Arthur Schopenhauer",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/schopenhauer/",
+    "dependencies": [
+      "kant",
+      "plato"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Schopenhauer on Ethics (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-126362713"
+      },
+      {
+        "title": "Closereads: Schopenhauer on Ethics (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-125678584"
+      },
+      {
+        "title": "Ep. 115 Aftershow: Schopenhauer and Music",
+        "link": "https://www.patreon.com/posts/ep-115-aftershow-50234341"
+      },
+      {
+        "title": "Ep. 115: Schopenhauer on Music with Guest Jonathan Segel (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-115-on-music-50234201"
+      },
+      {
+        "title": "Ep. 114: Schopenhauer: \u201cThe World Is Will\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-114-world-is-50233966"
+      },
+      {
+        "title": "Ep.  94: Schopenhauer on Reading, Writing, and Thinking",
+        "link": "https://www.patreon.com/posts/ep-94-on-reading-30346697"
+      },
+      {
+        "title": "Ep. 30: Schopenhauer on Explanations and Knowledge",
+        "link": "https://www.patreon.com/posts/ep-30-on-and-11381040"
+      }
+    ]
+  },
+  {
+    "id": "bergson",
+    "name": "Henri Bergson",
+    "category": "Process Phil",
+    "sep_link": "https://plato.stanford.edu/entries/bergson/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 57: Henri Bergson on Humor",
+        "link": "https://www.patreon.com/posts/ep-57-henri-on-17045388"
+      }
+    ]
+  },
+  {
+    "id": "locke",
+    "name": "John Locke",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/locke/",
+    "dependencies": [
+      "descartes",
+      "hobbes"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 260: Locke on Moral Psychology (Supporters Only)",
+        "link": "https://www.patreon.com/posts/ep-260-locke-on-46079923"
+      },
+      {
+        "title": "Ep. 259: Locke Clarifies Misleading Complex Ideas (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-259-locke-45552661"
+      },
+      {
+        "title": "PEL Nightcap Mid December 2020: New Intro to ep. 37 Locke on Political Power (Citizens Only)",
+        "link": "https://www.patreon.com/posts/pel-nightcap-mid-45031827"
+      },
+      {
+        "title": "Ep. 258: Locke on Acquiring Simple Ideas (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-258-locke-on-44767958"
+      },
+      {
+        "title": "Ep. 257: Locke Against Innate Ideas (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-257-locke-44221275"
+      },
+      {
+        "title": "Ep. 37: Locke on Political Power ",
+        "link": "https://www.patreon.com/posts/ep-37-locke-on-15462614"
+      }
+    ]
+  },
+  {
+    "id": "skepticism",
+    "name": "Skepticism",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/skepticism-ancient/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 106: Pyrrhonian Skepticism According to Sextus Empiricus (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-106-according-50223844"
+      },
+      {
+        "title": "Ep. 61: Nietzsche on Truth and Skepticism",
+        "link": "https://www.patreon.com/posts/ep-61-nietzsche-17045749"
+      }
+    ]
+  },
+  {
+    "id": "feyerabend",
+    "name": "Paul Feyerabend",
+    "category": "Phil of Science",
+    "sep_link": "https://plato.stanford.edu/entries/feyerabend/",
+    "dependencies": [
+      "kuhn",
+      "lakatos"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 281: Paul Feyerabend\u2019s Anarchist Philosophy of Science (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-281-paul-of-58351544"
+      },
+      {
+        "title": "Ep. 281: Paul Feyerabend's Anarchist Philosophy of Science (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-281-paul-of-58351540"
+      }
+    ]
+  },
+  {
+    "id": "adorno_horkheimer",
+    "name": "Adorno & Horkheimer",
+    "category": "Critical Theory",
+    "sep_link": "https://plato.stanford.edu/entries/critical-theory/",
+    "dependencies": [
+      "marx",
+      "kant",
+      "hegel",
+      "freud"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Horkheimer and Adorno on Enlightenment (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-and-140300733"
+      },
+      {
+        "title": "Closereads: Horkheimer and Adorno on Enlightenment (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-and-139726204"
+      },
+      {
+        "title": "Closereads: Horkheimer and Adorno on Enlightenment (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-and-139191897"
+      },
+      {
+        "title": "Ep. 136: Adorno on the Culture Industry (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-136-adorno-on-50808255"
+      }
+    ]
+  },
+  {
+    "id": "korsgaard",
+    "name": "Christine Korsgaard",
+    "category": "Ethics",
+    "sep_link": "https://plato.stanford.edu/entries/kant-moral/",
+    "dependencies": [
+      "kant",
+      "rawls"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 371: Christine Korsgaard on Normativity (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-371-christine-134057127"
+      },
+      {
+        "title": "Ep. 371: Christine Korsgaard on Normativity (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-371-christine-134056479"
+      },
+      {
+        "title": "Ep. 370: Christine Korsgaard on the History of Ethics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-370-christine-132493159"
+      },
+      {
+        "title": "Ep. 370: Christine Korsgaard on the History of Ethics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-370-christine-132447503"
+      }
+    ]
+  },
+  {
+    "id": "derrida",
+    "name": "Jacques Derrida",
+    "category": "Post-Structuralism",
+    "sep_link": "https://plato.stanford.edu/entries/derrida/",
+    "dependencies": [
+      "heidegger",
+      "husserl",
+      "saussure"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 75: Lacan &Derrida Criticize Poe\u2019s \u201cThe Purloined Letter\u201d",
+        "link": "https://www.patreon.com/posts/ep-75-lacan-poes-17046811"
+      }
+    ]
+  },
+  {
+    "id": "grice",
+    "name": "Paul Grice",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/grice/",
+    "dependencies": [
+      "austin",
+      "wittgenstein"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Grice's \"Logic and Conversation\" (Audio Part Three + Reflections)",
+        "link": "https://www.patreon.com/posts/closereads-logic-89775452"
+      },
+      {
+        "title": "Closereads: Grice's \"Logic and Conversation\" (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-logic-89775389"
+      },
+      {
+        "title": "Ep. 325: Paul Grice on Meaning and Conversation (Part Three for Supporters, aka Closereads Audio Part One)",
+        "link": "https://www.patreon.com/posts/ep-325-paul-on-89635373"
+      },
+      {
+        "title": "Ep. 325: Paul Grice on Meaning and Conversation (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-325-paul-on-89426642"
+      },
+      {
+        "title": "Ep. 325: Paul Grice on Meaning and Conversation (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-325-paul-on-89426489"
+      }
+    ]
+  },
+  {
+    "id": "nagarjuna",
+    "name": "Nagarjuna",
+    "category": "Eastern",
+    "sep_link": "https://plato.stanford.edu/entries/nagarjuna/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 27: Nagarjuna on Buddhist \u201cEmptiness\u201d",
+        "link": "https://www.patreon.com/posts/ep-27-nagarjuna-11380788"
+      }
+    ]
+  },
+  {
+    "id": "augustine",
+    "name": "Augustine",
+    "category": "Medieval",
+    "sep_link": "https://plato.stanford.edu/entries/augustine/",
+    "dependencies": [
+      "plato",
+      "plotinus"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 121/122 Aftershow on Augustine feat. James Wetzel",
+        "link": "https://www.patreon.com/posts/ep-121-122-on-50298565"
+      },
+      {
+        "title": "Ep. 121: Augustine on Being Good (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-121-augustine-50298372"
+      }
+    ]
+  },
+  {
+    "id": "liberalism",
+    "name": "Liberalism",
+    "category": "Topic",
+    "sep_link": "https://plato.stanford.edu/entries/liberalism/",
+    "dependencies": [
+      "locke",
+      "mill",
+      "rawls"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 374: Discussing Liberalism (Lincoln, et al) with Walter Sterling (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-374-lincoln-137104858"
+      },
+      {
+        "title": "Ep. 374: Discussing Liberalism (Lincoln, et al) with Walter Sterling (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-374-lincoln-137104153"
+      }
+    ]
+  },
+  {
+    "id": "smith",
+    "name": "Adam Smith",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/smith-moral-political/",
+    "dependencies": [
+      "hume"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 174: Adam Smith\u2019s \u201cWealth of Nations\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-174-adam-of-52104258"
+      },
+      {
+        "title": "Ep. 177: Guest Russ Roberts on Adam Smith and Libertarian Economics (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-177-guest-on-15462489"
+      }
+    ]
+  },
+  {
+    "id": "abortion",
+    "name": "Abortion Ethics",
+    "category": "Topic",
+    "sep_link": "https://plato.stanford.edu/entries/abortion/",
+    "dependencies": [
+      "foot",
+      "thomson"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 301: Is Abortion Morally Permissible? (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-301-is-part-72793485"
+      },
+      {
+        "title": "Ep. 301: Is Abortion Morally Permissible? (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-301-is-part-72490623"
+      },
+      {
+        "title": "Ep. 301: Is Abortion Morally Permissible? (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-301-is-part-72490632"
+      }
+    ]
+  },
+  {
+    "id": "pascal",
+    "name": "Blaise Pascal",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/pascal/",
+    "dependencies": [
+      "montaigne",
+      "descartes"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 184: Pascal on Human Nature (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-184-pascal-on-17118618"
+      }
+    ]
+  },
+  {
+    "id": "confucius",
+    "name": "Confucius",
+    "category": "Eastern",
+    "sep_link": "https://plato.stanford.edu/entries/confucius/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 159: Confucius on Virtuous Conduct (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-159-confucius-51032578"
+      }
+    ]
+  },
+  {
+    "id": "scheler",
+    "name": "Max Scheler",
+    "category": "Phenomenology",
+    "sep_link": "https://plato.stanford.edu/entries/scheler/",
+    "dependencies": [
+      "husserl",
+      "nietzsche"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Scheler on Personhood (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-on-130200475"
+      },
+      {
+        "title": "Closereads: Scheler on Personhood (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-127440657"
+      },
+      {
+        "title": "Ep. 365: Scheler on Love (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-365-scheler-127014008"
+      },
+      {
+        "title": "Ep. 365: Scheler on Love (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-365-scheler-127013840"
+      },
+      {
+        "title": "Closereads: Scheler on Personhood (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-126788095"
+      },
+      {
+        "title": "Ep. 364: Max Scheler on Sympathy (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-364-max-on-125992331"
+      },
+      {
+        "title": "Ep. 364: Max Scheler on Sympathy (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-364-max-on-125490048"
+      },
+      {
+        "title": "Ep. 364: Max Scheler on Sympathy (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-364-max-on-125400620"
+      }
+    ]
+  },
+  {
+    "id": "malebranche",
+    "name": "Nicolas Malebranche",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/malebranche/",
+    "dependencies": [
+      "descartes",
+      "augustine"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 286: Malebranche on Causality and Theology (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-286-on-and-61560816"
+      },
+      {
+        "title": "Ep. 286: Malebranche on Causality and Theology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-286-on-and-61502706"
+      },
+      {
+        "title": "Ep. 286: Malebranche on Causality and Theology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-286-on-and-61502699"
+      },
+      {
+        "title": "Ep. 285: Nicolas Malebranche on Knowledge (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-285-nicolas-60960308"
+      },
+      {
+        "title": "Ep. 285: Nicolas Malebranche on Knowledge (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-285-nicolas-60960268"
+      }
+    ]
+  },
+  {
+    "id": "mill",
+    "name": "J.S. Mill",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/mill/",
+    "dependencies": [
+      "bentham",
+      "aristotle"
+    ],
+    "episodes": [
+      {
+        "title": "Mill on Induction (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/mill-on-audio-117965705"
+      },
+      {
+        "title": "Closereads: Mill on Induction (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-mill-117447902"
+      },
+      {
+        "title": "Ep. 161: White Privilege (Peggy McIntosh, Charles Mills, et al) (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-161-white-et-51081573"
+      },
+      {
+        "title": "Ep. 228: Social Construction of Race (Appiah, Mills) (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-228-social-of-30927534"
+      },
+      {
+        "title": "Ep. 183: Mill on Liberty (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-183-mill-on-16804983"
+      },
+      {
+        "title": "Ep. 9: Utilitarian Ethics (Bentham &Mill)",
+        "link": "https://www.patreon.com/posts/ep-9-utilitarian-30313318"
+      }
+    ]
+  },
+  {
+    "id": "arendt",
+    "name": "Hannah Arendt",
+    "category": "Political Phil",
+    "sep_link": "https://plato.stanford.edu/entries/arendt/",
+    "dependencies": [
+      "heidegger",
+      "jaspers",
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 269: Arendt on Totalitarianism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-269-arendt-on-51100279"
+      },
+      {
+        "title": "Ep. 269: Arendt on Totalitarianism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-269-arendt-on-51099928"
+      },
+      {
+        "title": "Ep. 125: Hannah Arendt on the Political &Private (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-125-hannah-on-50433010"
+      },
+      {
+        "title": "Ep. 181: Hannah Arendt on the Banality of Evil (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-181-hannah-on-16433932"
+      }
+    ]
+  },
+  {
+    "id": "scruton",
+    "name": "Roger Scruton",
+    "category": "Aesthetics",
+    "sep_link": "https://plato.stanford.edu/entries/aesthetic-judgment/",
+    "dependencies": [
+      "kant",
+      "burke"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 288: Scruton on Ethical Art (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-288-scruton-63145182"
+      },
+      {
+        "title": "Ep. 288: Scruton on Ethical Art (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-288-scruton-63145174"
+      },
+      {
+        "title": "Ep. 287: Roger Scruton on Beauty (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-287-roger-on-62518846"
+      },
+      {
+        "title": "Ep. 287: Roger Scruton on Beauty (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-287-roger-on-62518837"
+      }
+    ]
+  },
+  {
+    "id": "royce",
+    "name": "Josiah Royce",
+    "category": "Pragmatism",
+    "sep_link": "https://plato.stanford.edu/entries/royce/",
+    "dependencies": [
+      "hegel",
+      "james"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 380: Josiah Royce on Community (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-380-josiah-on-144182887"
+      },
+      {
+        "title": "Ep. 380: Josiah Royce on Community (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-380-josiah-on-144182884"
+      }
+    ]
+  },
+  {
+    "id": "dewey",
+    "name": "John Dewey",
+    "category": "Pragmatism",
+    "sep_link": "https://plato.stanford.edu/entries/dewey/",
+    "dependencies": [
+      "james",
+      "hegel"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 127: John Dewey on Experience and the World (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-127-john-on-50433190"
+      },
+      {
+        "title": "Ep. 249: Dewey on Education and Thought (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-249-dewey-on-40050453"
+      }
+    ]
+  },
+  {
+    "id": "searle",
+    "name": "John Searle",
+    "category": "Phil of Mind",
+    "sep_link": "https://plato.stanford.edu/entries/searle/",
+    "dependencies": [
+      "austin"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 138: John Searle Interview on Perception (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-138-john-on-50859131"
+      }
+    ]
+  },
+  {
+    "id": "james",
+    "name": "William James",
+    "category": "Pragmatism",
+    "sep_link": "https://plato.stanford.edu/entries/james/",
+    "dependencies": [
+      "peirce",
+      "mill"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 349: Rorty's Pluralistic Pragmatism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-349-rortys-111235099"
+      },
+      {
+        "title": "Ep. 349: Rorty's Pluralistic Pragmatism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-349-rortys-111232983"
+      },
+      {
+        "title": "Closereads: William James on Asceticism and Saints (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-james-108450313"
+      },
+      {
+        "title": "Closereads: William James on Asceticism and Saints (Audio Part One, aka PEL Ep. 345 Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-james-108084609"
+      },
+      {
+        "title": "Ep. 345: William James on Religious Experience (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-345-william-107625219"
+      },
+      {
+        "title": "Ep. 345: William James on Religious Experience (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-345-william-107624683"
+      },
+      {
+        "title": "Ep. 179: William James\u2019s Introspective Psychology (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-179-william-15944072"
+      },
+      {
+        "title": "Ep. 22: More James\u2019s Pragmatism: Is Faith Justified? What is Truth?",
+        "link": "https://www.patreon.com/posts/ep-22-more-is-is-11380696"
+      },
+      {
+        "title": "Ep. 20: Pragmatism \u2013 Peirce and James",
+        "link": "https://www.patreon.com/posts/ep-20-pragmatism-11380562"
+      }
+    ]
+  },
+  {
+    "id": "socrates",
+    "name": "Socrates",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/socrates/",
+    "dependencies": [
+      "presocratics"
+    ],
+    "episodes": []
+  },
+  {
+    "id": "frege",
+    "name": "Gottlob Frege",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/frege/",
+    "dependencies": [
+      "kant",
+      "leibniz"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 34: Frege on the Logic of Language",
+        "link": "https://www.patreon.com/posts/ep-34-frege-on-15462540"
+      }
+    ]
+  },
+  {
+    "id": "stein",
+    "name": "Edith Stein",
+    "category": "Phenomenology",
+    "sep_link": "https://plato.stanford.edu/entries/stein/",
+    "dependencies": [
+      "husserl"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Edith Stein on Self (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-edith-129435866"
+      },
+      {
+        "title": "Closereads: Edith Stein on Self (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-edith-128844808"
+      },
+      {
+        "title": "Closereads: Edith Stein on Self (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-edith-128229627"
+      },
+      {
+        "title": "Ep. 366: Edith Stein on Empathy (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-366-edith-on-128004341"
+      },
+      {
+        "title": "Ep. 366: Edith Stein on Empathy (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-366-edith-on-128004342"
+      }
+    ]
+  },
+  {
+    "id": "parfit",
+    "name": "Derek Parfit",
+    "category": "Ethics",
+    "sep_link": "https://plato.stanford.edu/entries/parfit/",
+    "dependencies": [
+      "sidgwick",
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Parfit on Game Theory (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-132352692"
+      },
+      {
+        "title": "Closereads: Parfit on Game Theory (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-131841260"
+      },
+      {
+        "title": "Ep. 261: Derek Parfit on Personal Identity (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-261-derek-on-46364649"
+      },
+      {
+        "title": "Ep. 261: Derek Parfit on Personal Identity (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-261-derek-on-46364380"
+      }
+    ]
+  },
+  {
+    "id": "al-kindi",
+    "name": "Al-Kindi",
+    "category": "Medieval",
+    "sep_link": "https://plato.stanford.edu/entries/al-kindi/",
+    "dependencies": [
+      "aristotle",
+      "plotinus"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Al-Kindi on Dispelling Sorrows (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-al-on-97692114"
+      },
+      {
+        "title": "Closereads: Al-Kindi on Dispelling Sorrows (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-al-on-97189563"
+      },
+      {
+        "title": "Closereads: Al-Kindi on Dispelling Sorrows (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-al-on-96711837"
+      }
+    ]
+  },
+  {
+    "id": "zhuangzi",
+    "name": "Zhuangzi",
+    "category": "Eastern",
+    "sep_link": "https://plato.stanford.edu/entries/zhuangzi/",
+    "dependencies": [
+      "laozi"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 342: Zhuangzi on Knowledge and Virtue (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-342-zhuangzi-104993859"
+      },
+      {
+        "title": "Ep. 342: Zhuangzi on Knowledge and Virtue (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-342-zhuangzi-104965414"
+      },
+      {
+        "title": "Closereads: Zhuangzi, Ch. 19: \"Fathoming Life\" (Audio)",
+        "link": "https://www.patreon.com/posts/closereads-ch-19-104384115"
+      }
+    ]
+  },
+  {
+    "id": "benjamin",
+    "name": "Walter Benjamin",
+    "category": "Critical Theory",
+    "sep_link": "https://plato.stanford.edu/entries/benjamin/",
+    "dependencies": [
+      "marx"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 237: Walter Benjamin Analyzes Violence (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-237-walter-34549032"
+      }
+    ]
+  },
+  {
+    "id": "camus",
+    "name": "Albert Camus",
+    "category": "Existentialism",
+    "sep_link": "https://plato.stanford.edu/entries/camus/",
+    "dependencies": [
+      "sartre",
+      "nietzsche"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 244: Camus on Strategies for Facing Plague (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-244-camus-on-37508405"
+      },
+      {
+        "title": "Ep. 4: Camus and the Absurd",
+        "link": "https://www.patreon.com/posts/ep-4-camus-and-30313112"
+      }
+    ]
+  },
+  {
+    "id": "irigaray",
+    "name": "Luce Irigaray",
+    "category": "Feminist Phil",
+    "sep_link": "https://plato.stanford.edu/entries/irigaray/",
+    "dependencies": [
+      "lacan",
+      "derrida",
+      "beauvoir"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 375: Luce Irigaray\u2019s Feminism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-375-luce-part-138216231"
+      },
+      {
+        "title": "Ep. 375: Luce Irigaray\u2019s Feminism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-375-luce-part-138216224"
+      }
+    ]
+  },
+  {
+    "id": "kuhn",
+    "name": "Thomas Kuhn",
+    "category": "Phil of Science",
+    "sep_link": "https://plato.stanford.edu/entries/thomas-kuhn/",
+    "dependencies": [
+      "popper"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 86: Thomas Kuhn on Scientific Progress (w/ Dylan Intro)",
+        "link": "https://www.patreon.com/posts/ep-86-thomas-on-30337169"
+      }
+    ]
+  },
+  {
+    "id": "bentham",
+    "name": "Jeremy Bentham",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/bentham/",
+    "dependencies": [
+      "hume"
+    ],
+    "episodes": []
+  },
+  {
+    "id": "wittgenstein",
+    "name": "Ludwig Wittgenstein",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/wittgenstein/",
+    "dependencies": [
+      "frege",
+      "russell"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 310: Wittgenstein On World-Pictures (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-310-on-world-78227981"
+      },
+      {
+        "title": "Ep. 310: Wittgenstein On World-Pictures (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-310-on-world-78227978"
+      },
+      {
+        "title": "Ep. 309: Wittgenstein On Certainty (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-309-on-part-77781165"
+      },
+      {
+        "title": "Ep. 309: Wittgenstein On Certainty (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-309-on-part-77781029"
+      },
+      {
+        "title": "Ep. 56: More Wittgenstein on Language",
+        "link": "https://www.patreon.com/posts/ep-56-more-on-17044181"
+      },
+      {
+        "title": "Ep. 55: Wittgenstein on Language",
+        "link": "https://www.patreon.com/posts/ep-55-on-17043946"
+      },
+      {
+        "title": "Ep. 8: Wittgenstein\u2019s Tractatus (and Carnap): What Can We Legitimately Talk About?",
+        "link": "https://www.patreon.com/posts/ep-8-tractatus-30313266"
+      },
+      {
+        "title": "Ep. 7: Wittgenstein\u2019s Tractatus: What Is There and Can We Talk About It?",
+        "link": "https://www.patreon.com/posts/ep-7-tractatus-30313224"
+      }
+    ]
+  },
+  {
+    "id": "stoicism",
+    "name": "Stoicism",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/stoicism/",
+    "dependencies": [
+      "socrates"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Hegel on Stoicism (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-138746018"
+      },
+      {
+        "title": "Closereads: Hegel on Stoicism (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-138067661"
+      },
+      {
+        "title": "Closereads: Epictetus' Discourses (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-audio-89315434"
+      },
+      {
+        "title": "Closereads: Epictetus' Discourses (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-audio-89098858"
+      },
+      {
+        "title": "Ep. 132: Living Stoically with Seneca and Massimo (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-132-living-50466903"
+      },
+      {
+        "title": "Ep. 124: The Stoic Life with Epictetus (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-124-stoic-50432763"
+      },
+      {
+        "title": "Ep. 201 Follow-Up: More on Marcus Aurelius\u2019s \u201cMeditations\u201d (Citizens Only)",
+        "link": "https://www.patreon.com/posts/ep-201-follow-up-22424168"
+      },
+      {
+        "title": "Ep. 201: Marcus Aurelius\u2019s Stoicism with Ryan Holiday (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-201-marcus-22279068"
+      }
+    ]
+  },
+  {
+    "id": "chalmers",
+    "name": "David Chalmers",
+    "category": "Phil of Mind",
+    "sep_link": "https://plato.stanford.edu/entries/chalmers/",
+    "dependencies": [
+      "descartes"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 222: Debating Functionalism (Block, Chalmers) (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-222-debating-28766145"
+      },
+      {
+        "title": "Ep. 218: The Hard Problem of Consciousness (Chalmers, et al) (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-218-hard-of-27686931"
+      },
+      {
+        "title": "Not School Philosophy of Mind Group: David Chalmers",
+        "link": "https://www.patreon.com/posts/not-school-of-27529914"
+      },
+      {
+        "title": "Ep. 68: David Chalmers Interview on the Scrutability of the World",
+        "link": "https://www.patreon.com/posts/ep-68-david-on-17046593"
+      }
+    ]
+  },
+  {
+    "id": "williamson",
+    "name": "Timothy Williamson",
+    "category": "Analytic",
+    "sep_link": "",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 354: Guest Tim Williamson on Philosophic Method (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-354-guest-tim-115227249"
+      },
+      {
+        "title": "Ep. 354: Guest Tim Williamson on Philosophic Method (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-354-guest-tim-115227243"
+      },
+      {
+        "title": "Ep. 348: Tim Williamson's Knowledge-First Epistemology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-348-tim-first-110362934"
+      },
+      {
+        "title": "Ep. 348: Tim Williamson's Knowledge-First Epistemology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-348-tim-first-110362609"
+      }
+    ]
+  },
+  {
+    "id": "feuerbach",
+    "name": "Ludwig Feuerbach",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/ludwig-feuerbach/",
+    "dependencies": [
+      "hegel"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 357: Feuerbach on the Evolution of Philosophy (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-357-feuerbach-118393169"
+      },
+      {
+        "title": "Ep. 357: Feuerbach on the Evolution of Philosophy (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-357-feuerbach-118051673"
+      },
+      {
+        "title": "Ep. 357: Feuerbach on the Evolution of Philosophy (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-357-feuerbach-118020676"
+      },
+      {
+        "title": "Ep. 356: Feuerbach Against Theology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-356-feuerbach-117110441"
+      },
+      {
+        "title": "Ep. 356: Feuerbach Against Theology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-356-feuerbach-117110226"
+      }
+    ]
+  },
+  {
+    "id": "stirner",
+    "name": "Max Stirner",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/max-stirner/",
+    "dependencies": [
+      "hegel",
+      "feuerbach"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 358: Max Stirner's Egoism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-358-max-part-119320303"
+      },
+      {
+        "title": "Ep. 358: Max Stirner's Egoism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-358-max-part-119266665"
+      }
+    ]
+  },
+  {
+    "id": "sartre",
+    "name": "Jean-Paul Sartre",
+    "category": "Existentialism",
+    "sep_link": "https://plato.stanford.edu/entries/sartre/",
+    "dependencies": [
+      "heidegger",
+      "husserl",
+      "kierkegaard",
+      "marx"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Sartre on Nothingness (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-on-116766981"
+      },
+      {
+        "title": "Closereads: Sartre on Nothingness (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-on-116574625"
+      },
+      {
+        "title": "Closereads: Sartre on Nothingness (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-116015606"
+      },
+      {
+        "title": "Closereads: Sartre on Nothingness (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-115429291"
+      },
+      {
+        "title": "Close Reading: Sartre\u2019s \u201cBeing and Nothingness,\u201d Section I",
+        "link": "https://www.patreon.com/posts/close-reading-i-52104573"
+      },
+      {
+        "title": "Not School: Jean-Paul Sartre\u2019s \u201cNausea\u201d",
+        "link": "https://www.patreon.com/posts/not-school-jean-37508517"
+      },
+      {
+        "title": "Ep. 212: Sartre on Literature (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-212-sartre-on-25790525"
+      },
+      {
+        "title": "Ep. 211: Sartre on Racism and Authenticity (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-211-sartre-on-25293593"
+      },
+      {
+        "title": "Citizen Outtakes from \"No Exit\"",
+        "link": "https://www.patreon.com/posts/citizen-outtakes-144343626"
+      },
+      {
+        "title": "Not Ep. 87: Sartre\u2019s \u201cNo Exit\u201d Read with Lucy Lawless &Jaime Murray",
+        "link": "https://www.patreon.com/posts/not-ep-87-no-30344774"
+      },
+      {
+        "title": "Ep. 87: Sartre on Freedom and Self-Deception (w/ Mark Intro)",
+        "link": "https://www.patreon.com/posts/ep-87-sartre-on-30337379"
+      },
+      {
+        "title": "Ep. 47: Sartre on Consciousness and the Self",
+        "link": "https://www.patreon.com/posts/ep-47-sartre-on-15467740"
+      }
+    ]
+  },
+  {
+    "id": "haraway",
+    "name": "Donna Haraway",
+    "category": "Feminist Phil",
+    "sep_link": "https://plato.stanford.edu/entries/feminist-science/",
+    "dependencies": [
+      "foucault"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 293: Donna Haraway on Feminist Science (Tiny Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-293-donna-on-66478219"
+      },
+      {
+        "title": "Ep. 293: Donna Haraway on Feminist Science (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-293-donna-on-66167272"
+      },
+      {
+        "title": "Ep. 293: Donna Haraway on Feminist Science (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-293-donna-on-66167271"
+      }
+    ]
+  },
+  {
+    "id": "merleau_ponty",
+    "name": "Maurice Merleau-Ponty",
+    "category": "Phenomenology",
+    "sep_link": "https://plato.stanford.edu/entries/merleau-ponty/",
+    "dependencies": [
+      "husserl",
+      "heidegger"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Merleau-Ponty on the Body (Audio Part Five)",
+        "link": "https://www.patreon.com/posts/closereads-ponty-113379336"
+      },
+      {
+        "title": "Closereads: Merleau-Ponty on the Body (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-ponty-112882107"
+      },
+      {
+        "title": "Closereads: Merleau-Ponty on the Body (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-ponty-112364952"
+      },
+      {
+        "title": "Closereads: Merleau-Ponty on the Body (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-ponty-111923428"
+      },
+      {
+        "title": "Closereads: Merleau-Ponty on the Body (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-ponty-111484199"
+      },
+      {
+        "title": "Ep. 248: Racism and Policing (Al-Saji, Merleau-Ponty, et al) (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-248-racism-al-39527837"
+      },
+      {
+        "title": "Ep. 48: Merleau-Ponty on Perception and Knowledge",
+        "link": "https://www.patreon.com/posts/ep-48-merleau-on-15467764"
+      }
+    ]
+  },
+  {
+    "id": "maimonides",
+    "name": "Maimonides",
+    "category": "Medieval",
+    "sep_link": "https://plato.stanford.edu/entries/maimonides/",
+    "dependencies": [
+      "aristotle"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 101: Maimonides on God (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-101-on-god-33200446"
+      }
+    ]
+  },
+  {
+    "id": "montaigne",
+    "name": "Montaigne",
+    "category": "Renaissance",
+    "sep_link": "https://plato.stanford.edu/entries/montaigne/",
+    "dependencies": [
+      "skepticism"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 33: Montaigne: What Is the Purpose of Philosophy?",
+        "link": "https://www.patreon.com/posts/ep-33-montaigne-15372951"
+      }
+    ]
+  },
+  {
+    "id": "rousseau",
+    "name": "Jean-Jacques Rousseau",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/rousseau/",
+    "dependencies": [
+      "hobbes",
+      "locke"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 23: Rousseau: Human Nature vs. Culture",
+        "link": "https://www.patreon.com/posts/ep-23-rousseau-11380725"
+      }
+    ]
+  },
+  {
+    "id": "levinas",
+    "name": "Emmanuel Levinas",
+    "category": "Phenomenology",
+    "sep_link": "https://plato.stanford.edu/entries/levinas/",
+    "dependencies": [
+      "husserl",
+      "heidegger"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Levinas on Buber (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-on-106211087"
+      },
+      {
+        "title": "Closereads: Levinas on Buber (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-on-105881528"
+      },
+      {
+        "title": "Closereads: Levinas on Buber (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-105312529"
+      },
+      {
+        "title": "Closereads: Levinas on Buber (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-104851221"
+      },
+      {
+        "title": "Ep. 146: Emmanuel Levinas on Overcoming Solitude (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-146-emmanuel-50891878"
+      },
+      {
+        "title": "Ep. 145: Emmanuel Levinas: Why Be Ethical? (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-145-emmanuel-50891750"
+      }
+    ]
+  },
+  {
+    "id": "leibniz",
+    "name": "Gottfried Leibniz",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/leibniz/",
+    "dependencies": [
+      "descartes",
+      "spinoza"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 253: Leibniz on the Problem of Evil (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-253-leibniz-42113797"
+      },
+      {
+        "title": "Ep. 253: Leibniz on the Problem of Evil (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-253-leibniz-42055569"
+      },
+      {
+        "title": "Ep. 6: Leibniz\u2019s Monadology: What Is There?",
+        "link": "https://www.patreon.com/posts/ep-6-leibnizs-is-30313191"
+      }
+    ]
+  },
+  {
+    "id": "freud",
+    "name": "Sigmund Freud",
+    "category": "Psychoanalysis",
+    "sep_link": "https://plato.stanford.edu/entries/freud/",
+    "dependencies": [
+      "nietzsche"
+    ],
+    "episodes": [
+      {
+        "title": "(sub)Text #4: Freud\u2019s \u201cMourning and Melancholia\u201d (Citizens Only)",
+        "link": "https://www.patreon.com/posts/sub-text-4-and-21956697"
+      },
+      {
+        "title": "Ep. 116 Aftershow: Freud and Dream Interpretation",
+        "link": "https://www.patreon.com/posts/ep-116-aftershow-50234563"
+      },
+      {
+        "title": "Ep. 116: Freud on Dreams (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-116-freud-on-50234482"
+      },
+      {
+        "title": "Ep. 26: Freud on the Human Condition",
+        "link": "https://www.patreon.com/posts/ep-26-freud-on-11380750"
+      }
+    ]
+  },
+  {
+    "id": "mozi",
+    "name": "Mozi",
+    "category": "Eastern",
+    "sep_link": "https://plato.stanford.edu/entries/mohism/",
+    "dependencies": [
+      "confucius"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 313: Mozi\u2019s Political Ethics (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-313-mozis-for-80532362"
+      },
+      {
+        "title": "Ep. 313: Mozi\u2019s Political Ethics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-313-mozis-two-80282413"
+      },
+      {
+        "title": "Ep. 313: Mozi\u2019s Political Ethics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-313-mozis-one-80282412"
+      }
+    ]
+  },
+  {
+    "id": "burke",
+    "name": "Edmund Burke",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/burke/",
+    "dependencies": [
+      "locke"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 151: Edmund Burke\u2019s Conservatism (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-151-edmund-50992585"
+      },
+      {
+        "title": "Ep. 107: Edmund Burke on the Sublime (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-107-edmund-on-50223986"
+      }
+    ]
+  },
+  {
+    "id": "moore",
+    "name": "G.E. Moore",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/moore/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 307: G.E. Moore Defends Common Sense (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-307-g-e-moore-76336589"
+      },
+      {
+        "title": "Ep. 307: G.E. Moore Defends Common Sense (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-307-g-e-moore-76336587"
+      }
+    ]
+  },
+  {
+    "id": "frankfurt",
+    "name": "Harry Frankfurt",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/compatibilism/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 327: Harry Frankfurt on Bullshit and Authenticity (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-327-harry-on-91047605"
+      },
+      {
+        "title": "Ep. 327: Harry Frankfurt on Bullshit and Authenticity (Part One for Supporters) ",
+        "link": "https://www.patreon.com/posts/ep-327-harry-on-90964359"
+      }
+    ]
+  },
+  {
+    "id": "popper",
+    "name": "Karl Popper",
+    "category": "Phil of Science",
+    "sep_link": "https://plato.stanford.edu/entries/popper/",
+    "dependencies": [
+      "hume",
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 82: Karl Popper on Science (w/ Dylan Intro)",
+        "link": "https://www.patreon.com/posts/ep-82-karl-on-w-27513246"
+      }
+    ]
+  },
+  {
+    "id": "kant",
+    "name": "Immanuel Kant",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/kant/",
+    "dependencies": [
+      "hume",
+      "leibniz",
+      "rousseau"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 372: Kant's Ethics Lectures (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-372-kants-for-135687116"
+      },
+      {
+        "title": "Ep. 372: Kant's Ethics Lectures (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-372-kants-two-135074975"
+      },
+      {
+        "title": "Ep. 372: Kant's Ethics Lectures (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-372-kants-one-135003600"
+      },
+      {
+        "title": "Closereads: Hegel on Jesus and Kant (Audio Part Five + Reflections on Recent PEL Episodes)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-96370566"
+      },
+      {
+        "title": "Closereads: Hegel on Jesus and Kant (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-95487611"
+      },
+      {
+        "title": "Closereads: Hegel on Jesus and Kant (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-95164765"
+      },
+      {
+        "title": "Closereads: Hegel on Jesus and Kant (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-94724434"
+      },
+      {
+        "title": "Closereads: Hegel on Jesus and Kant (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-hegel-94271014"
+      },
+      {
+        "title": "Ep. 295: Kant on Preventing War (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-295-kant-on-67657683"
+      },
+      {
+        "title": "Ep. 295: Kant on Preventing War (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-295-kant-on-67387341"
+      },
+      {
+        "title": "Ep. 295: Kant on Preventing War (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-295-kant-on-67387339"
+      },
+      {
+        "title": "Close Reading: Kant\u2019s \u201cCritique of Judgment\u201d on the Sublime",
+        "link": "https://www.patreon.com/posts/close-reading-of-50227242"
+      },
+      {
+        "title": "Ep. 224: Kierkegaard Critiques The Present Age (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-224-critiques-29457938"
+      },
+      {
+        "title": "Ep. 200: Kant/Mendelssohn/Foucault on Enlightenment (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-200-kant-on-21956766"
+      },
+      {
+        "title": "Ep. 105: Kant: What Is Beauty? (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-105-kant-what-50223733"
+      },
+      {
+        "title": "Ep. 44: New Atheist Critiques of Religion",
+        "link": "https://www.patreon.com/posts/ep-44-new-of-15463063"
+      },
+      {
+        "title": "Ep. 19: Kant: What Can We Know?",
+        "link": "https://www.patreon.com/posts/ep-19-kant-what-11380530"
+      },
+      {
+        "title": "Ep 10: Kantian Ethics: What Should We Do?",
+        "link": "https://www.patreon.com/posts/ep-10-kantian-we-30313369"
+      }
+    ]
+  },
+  {
+    "id": "thoreau",
+    "name": "Henry David Thoreau",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/thoreau/",
+    "dependencies": [
+      "emerson"
+    ],
+    "episodes": [
+      {
+        "title": "Ep.103: Thoreau on Living Deliberately (Citizen Editon)",
+        "link": "https://www.patreon.com/posts/ep-103-thoreau-33200609"
+      }
+    ]
+  },
+  {
+    "id": "kierkegaard",
+    "name": "S\u00f8ren Kierkegaard",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/kierkegaard/",
+    "dependencies": [
+      "hegel",
+      "socrates"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 333: Kierkegaard\u2019s \u201cFear and Trembling\u201d on Faith (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-333-fear-and-96076423"
+      },
+      {
+        "title": "Ep. 333: Kierkegaard\u2019s \u201cFear and Trembling\u201d on Faith (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-333-fear-and-96076296"
+      },
+      {
+        "title": "Ep. 332: Kierkegaard's \"Either/Or\": The Ethical Self (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-332-either-or-95228851"
+      },
+      {
+        "title": "Ep. 332: Kierkegaard's \"Either/Or\": The Ethical Self (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-332-either-or-95228484"
+      },
+      {
+        "title": "Ep. 331: Kierkegaard's \"Either/Or\": The Ethical Life (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-331-either-or-94853390"
+      },
+      {
+        "title": "Ep. 331: Kierkegaard's \"Either/Or\": The Ethical Life (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-331-either-or-94449910"
+      },
+      {
+        "title": "Ep. 331: Kierkegaard's \"Either/Or\": The Ethical Life (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-331-either-or-94444582"
+      },
+      {
+        "title": "Ep. 330: Kierkegaard's \"Either/Or\": The Aesthetic Life (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-330-either-or-94007775"
+      },
+      {
+        "title": "Ep. 329: Kierkegaard on Irony (Part Four for Supporters, aka Closereads Audio Part Two)",
+        "link": "https://www.patreon.com/posts/ep-329-on-irony-93756649"
+      },
+      {
+        "title": "Ep. 330: Kierkegaard\u2019s \u201cEither/Or\u201d: The Aesthetic Life (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-330-either-or-93528487"
+      },
+      {
+        "title": "Ep. 330: Kierkegaard\u2019s \u201cEither/Or\u201d: The Aesthetic Life (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-330-either-or-93528237"
+      },
+      {
+        "title": "Ep. 329: Kierkegaard on Irony (Part Three for Supporters, aka Closereads Audio Part One)",
+        "link": "https://www.patreon.com/posts/ep-329-on-irony-93218225"
+      },
+      {
+        "title": "Ep. 329: Kierkegaard on Irony (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-329-on-irony-92663939"
+      },
+      {
+        "title": "Ep. 329: Kierkegaard on Irony (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-329-on-irony-92663946"
+      },
+      {
+        "title": "Ep. 29: Kierkegaard on the Self",
+        "link": "https://www.patreon.com/posts/ep-29-on-self-11381010"
+      }
+    ]
+  },
+  {
+    "id": "jung",
+    "name": "Carl Jung",
+    "category": "Psychoanalysis",
+    "sep_link": "",
+    "dependencies": [
+      "freud"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 81: Jung on the Psyche and Dreams (w/ Wes Intro)",
+        "link": "https://www.patreon.com/posts/ep-81-jung-on-w-27510128"
+      }
+    ]
+  },
+  {
+    "id": "nyaya",
+    "name": "Nyaya",
+    "category": "Eastern",
+    "sep_link": "https://plato.stanford.edu/entries/epistemology-india/",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 347: Nyaya Sutra Against Buddhist Skeptics (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-347-nyaya-for-109896925"
+      },
+      {
+        "title": "Ep. 347: Nyaya Sutra Against Buddhist Skeptics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-347-nyaya-two-109480324"
+      },
+      {
+        "title": "Ep. 347: Nyaya Sutra Against Buddhist Skeptics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-347-nyaya-one-109480317"
+      },
+      {
+        "title": "Ep. 346: Nyaya Sutra on Knowledge (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-346-nyaya-on-108553344"
+      },
+      {
+        "title": "Ep. 346: Nyaya Sutra on Knowledge (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-346-nyaya-on-108553353"
+      },
+      {
+        "title": "Ep. 270: Classical Indian (Vedanta and Nyaya) Design Arguments for God (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-270-classical-51713712"
+      },
+      {
+        "title": "Ep. 270: Classical Indian (Vedanta and Nyaya) Design Arguments for God (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-270-classical-51713547"
+      }
+    ]
+  },
+  {
+    "id": "marx",
+    "name": "Karl Marx",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/marx/",
+    "dependencies": [
+      "hegel",
+      "feuerbach",
+      "smith"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 361: Marx on Machines (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-361-marx-on-122447533"
+      },
+      {
+        "title": "Ep. 361: Marx on Machines (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-361-marx-on-122447457"
+      },
+      {
+        "title": "Closereads: Marx on Stirner (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-marx-122079715"
+      },
+      {
+        "title": "Closereads: Marx on Stirner (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-marx-121503832"
+      },
+      {
+        "title": "Ep. 360: Karl Marx on Economic Value (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-360-karl-marx-121368452"
+      },
+      {
+        "title": "Ep. 360: Karl Marx on Economic Value (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-360-karl-marx-121368447"
+      },
+      {
+        "title": "Closereads: Marx on Stirner (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-marx-120967445"
+      },
+      {
+        "title": "Ep. 359: Karl Marx's Project (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-359-karl-part-120367815"
+      },
+      {
+        "title": "Ep. 359: Karl Marx's Project (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-359-karl-part-120219712"
+      },
+      {
+        "title": "Ep. 355: Marx on Alienation (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-355-marx-on-116887597"
+      },
+      {
+        "title": "Ep. 355: Marx on Alienation (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-355-marx-on-116083611"
+      },
+      {
+        "title": "Ep. 355: Marx on Alienation (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-355-marx-on-116083442"
+      },
+      {
+        "title": "Ep. 70: Marx on the Human Condition",
+        "link": "https://www.patreon.com/posts/ep-70-marx-on-17046635"
+      }
+    ]
+  },
+  {
+    "id": "cioran",
+    "name": "Emil Cioran",
+    "category": "Existentialism",
+    "sep_link": "",
+    "dependencies": [
+      "nietzsche",
+      "schopenhauer"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 377: Emil Cioran's Pessimism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-377-emil-part-140541110"
+      },
+      {
+        "title": "Ep. 377: Emil Cioran's Pessimism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-377-emil-part-140536968"
+      }
+    ]
+  },
+  {
+    "id": "hume",
+    "name": "David Hume",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/hume/",
+    "dependencies": [
+      "locke",
+      "berkeley",
+      "hutcheson"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 368: Hume on Reason in Ethics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-368-hume-on-130468935"
+      },
+      {
+        "title": "Ep. 368: Hume on Reason in Ethics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-368-hume-on-130468936"
+      },
+      {
+        "title": "Ep. 367: Hume on the Foundations of Ethics (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-367-hume-on-129109984"
+      },
+      {
+        "title": "Ep. 367: Hume on the Foundations of Ethics (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-367-hume-on-129109975"
+      },
+      {
+        "title": "Closereads: Hume on Passions (Audio Part Five)",
+        "link": "https://www.patreon.com/posts/closereads-hume-92939530"
+      },
+      {
+        "title": "Closereads: Hume on Passions (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-hume-92586348"
+      },
+      {
+        "title": "Closereads: Hume on Passions (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-hume-92020906"
+      },
+      {
+        "title": "Closereads: Hume on Passions (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-hume-91656833"
+      },
+      {
+        "title": "Closereads: Hume on Passions (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-hume-91212623"
+      },
+      {
+        "title": "Ep. 289: Aesthetic Sense Theory: Hume (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-289-aesthetic-63784404"
+      },
+      {
+        "title": "Ep. 289: Aesthetic Sense Theory: Shaftesbury, Hutcheson, Hume (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-289-aesthetic-63784403"
+      },
+      {
+        "title": "Ep. 167: Hume on Intelligent Design (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-167-hume-on-52068122"
+      },
+      {
+        "title": "Ep. 45: Moral Sense Theory: Hume and Smith",
+        "link": "https://www.patreon.com/posts/ep-45-moral-hume-15467492"
+      },
+      {
+        "title": "Ep. 41: Pat Churchland on the Neurobiology of Morality, Plus Hume\u2019s Ethics",
+        "link": "https://www.patreon.com/posts/ep-41-pat-on-of-15462949"
+      },
+      {
+        "title": "Ep. 17: Hume\u2019s Empiricism: What Can We Know?",
+        "link": "https://www.patreon.com/posts/ep-17-humes-what-11380418"
+      }
+    ]
+  },
+  {
+    "id": "sandel",
+    "name": "Michael Sandel",
+    "category": "Political Phil",
+    "sep_link": "https://plato.stanford.edu/entries/communitarianism/",
+    "dependencies": [
+      "rawls",
+      "aristotle"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 254: Michael Sandel Against Meritocracy (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-254-michael-42635473"
+      },
+      {
+        "title": "Ep. 254: Michael Sandel Interview: Against Meritocracy (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-254-michael-42633343"
+      },
+      {
+        "title": "Ep. 98: Guest Michael Sandel Against Market Society",
+        "link": "https://www.patreon.com/posts/ep-98-guest-30347436"
+      },
+      {
+        "title": "Ep. 97: Michael Sandel on Social Justice and the Self",
+        "link": "https://www.patreon.com/posts/ep-97-michael-on-30347383"
+      }
+    ]
+  },
+  {
+    "id": "beauvoir",
+    "name": "Simone de Beauvoir",
+    "category": "Existentialism",
+    "sep_link": "https://plato.stanford.edu/entries/beauvoir/",
+    "dependencies": [
+      "sartre",
+      "hegel"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 140/141 Aftershow on Simone De Beauvoir\u2019s \u201cEthics of Ambiguity\u201d feat. Jennifer Hansen",
+        "link": "https://www.patreon.com/posts/ep-140-141-on-de-50859750"
+      },
+      {
+        "title": "Ep. 141: Beauvoir\u2019s Existentialism: Moral and Political Dilemmas (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-141-beauvoirs-50859500"
+      },
+      {
+        "title": "Ep. 140: Beauvoir on the Ambiguous Human Condition (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-140-beauvoir-50859380"
+      },
+      {
+        "title": "Ep. 234: Beauvoir on Romance in \u201cThe Second Sex\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-234-beauvoir-33305609"
+      },
+      {
+        "title": "Ep. 232: Simone de Beauvoir\u2019s \u201cThe Second Sex\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-232-simone-de-32705616"
+      }
+    ]
+  },
+  {
+    "id": "schelling",
+    "name": "F.W.J. Schelling",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/schelling/",
+    "dependencies": [
+      "kant",
+      "fichte",
+      "spinoza"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 322: Schelling on Art vs. Nature (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-322-schelling-86959973"
+      },
+      {
+        "title": "Ep. 322: Schelling on Art vs. Nature (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-322-schelling-86488906"
+      },
+      {
+        "title": "Ep. 322: Schelling on Art vs. Nature (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-322-schelling-86488918"
+      },
+      {
+        "title": "Ep. 274: Schelling on Self-Consciousness (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-274-schelling-53831011"
+      },
+      {
+        "title": "Ep. 274: Schelling on Self-Consciousness (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-274-schelling-53831010"
+      },
+      {
+        "title": "Ep. 273: Friedrich Schelling\u2019s Foundationalist Idealism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-273-friedrich-53324711"
+      },
+      {
+        "title": "Ep. 273: Friedrich Schelling\u2019s Foundationalist Idealism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-273-friedrich-53324574"
+      }
+    ]
+  },
+  {
+    "id": "emerson",
+    "name": "Ralph Waldo Emerson",
+    "category": "19th Century",
+    "sep_link": "https://plato.stanford.edu/entries/emerson/",
+    "dependencies": [
+      "plato",
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Emerson's Oversoul (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-audio-87889748"
+      },
+      {
+        "title": "Closereads: Emerson's Oversoul (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-audio-87801926"
+      },
+      {
+        "title": "Closreads: Emerson's Oversoul (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closreads-audio-87680274"
+      },
+      {
+        "title": "Closereads: Emerson's Oversoul (Part One)",
+        "link": "https://www.patreon.com/posts/closereads-part-87673391"
+      },
+      {
+        "title": "Ep. 102: Emerson on Wisdom and Individuality (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-102-emerson-33200505"
+      }
+    ]
+  },
+  {
+    "id": "husserl",
+    "name": "Edmund Husserl",
+    "category": "Phenomenology",
+    "sep_link": "https://plato.stanford.edu/entries/husserl/",
+    "dependencies": [
+      "brentano",
+      "descartes",
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Husserl on Perceiving Minds (Audio)",
+        "link": "https://www.patreon.com/posts/closereads-on-124860764"
+      },
+      {
+        "title": "Closereads: Husserl on Essences (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-on-120219485"
+      },
+      {
+        "title": "Closereads: Husserl on Essences (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-119684161"
+      },
+      {
+        "title": "Closereads: Husserl on Essences (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-118886429"
+      }
+    ]
+  },
+  {
+    "id": "heidegger",
+    "name": "Martin Heidegger",
+    "category": "Phenomenology",
+    "sep_link": "https://plato.stanford.edu/entries/heidegger/",
+    "dependencies": [
+      "husserl",
+      "aristotle",
+      "nietzsche"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Heidegger on Technology (Audio Part Five)",
+        "link": "https://www.patreon.com/posts/closereads-on-110611718"
+      },
+      {
+        "title": "Closereads: Heidegger on Technology (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-on-110215430"
+      },
+      {
+        "title": "Closereads: Heidegger on Technology (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-on-109736262"
+      },
+      {
+        "title": "Closereads: Heidegger on Technology (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-109356025"
+      },
+      {
+        "title": "Closereads: Heidegger on Technology (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-on-108921281"
+      },
+      {
+        "title": "Ep. 297: Heidegger on the Human Condition (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-297-heidegger-69243213"
+      },
+      {
+        "title": "Ep. 297: Heidegger on the Human Condition (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-297-heidegger-69019358"
+      },
+      {
+        "title": "Ep. 297: Heidegger on the Human Condition (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-297-heidegger-69019342"
+      },
+      {
+        "title": "Ep. 296: Heidegger Questions Being (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-296-heidegger-68206817"
+      },
+      {
+        "title": "Ep. 296: Heidegger Questions Being (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-296-heidegger-68206815"
+      },
+      {
+        "title": "Close Reading: Heidegger\u2019s \u201cOn the Essence of Truth\u201d",
+        "link": "https://www.patreon.com/posts/close-reading-on-50229966"
+      },
+      {
+        "title": "Ep. 80: Heidegger on our Existential Situation (w/ Seth Intro)",
+        "link": "https://www.patreon.com/posts/ep-80-heidegger-27508261"
+      },
+      {
+        "title": "Ep. 32: Heidegger: What is \u201cBeing?\u201d",
+        "link": "https://www.patreon.com/posts/ep-32-heidegger-11381085"
+      }
+    ]
+  },
+  {
+    "id": "quine",
+    "name": "W.V.O. Quine",
+    "category": "Analytic",
+    "sep_link": "https://plato.stanford.edu/entries/quine/",
+    "dependencies": [
+      "carnap",
+      "russell"
+    ],
+    "episodes": [
+      {
+        "title": "Audiobook: W.V.O. Quine\u2019s \u201cTwo Dogmas of Empiricism\u201d",
+        "link": "https://www.patreon.com/posts/audiobook-w-v-o-70796998"
+      },
+      {
+        "title": "Audiobook: W.V.O. Quine\u2019s \u201cOn What There Is\u201d",
+        "link": "https://www.patreon.com/posts/audiobook-w-v-o-70796801"
+      },
+      {
+        "title": "Ep. 294: Quine on Science vs. Epistemology (Part Three for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-294-quine-on-67066015"
+      },
+      {
+        "title": "Ep. 294: Quine on Science vs. Epistemology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-294-quine-on-66745875"
+      },
+      {
+        "title": "Ep. 294: Quine on Science vs. Epistemology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-294-quine-on-66745874"
+      },
+      {
+        "title": "Ep. 66: Quine on Linguistic Meaning and Science",
+        "link": "https://www.patreon.com/posts/ep-66-quine-on-17045937"
+      }
+    ]
+  },
+  {
+    "id": "tomasello",
+    "name": "Michael Tomasello",
+    "category": "Phil of Mind",
+    "sep_link": "",
+    "dependencies": [],
+    "episodes": [
+      {
+        "title": "Ep. 326: Michael Tomasello on the Evolution of Agency (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-326-michael-89975389"
+      },
+      {
+        "title": "Ep. 326: Guest Michael Tomasello on the Evolution of Agency (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-326-guest-on-89970564"
+      },
+      {
+        "title": "Ep. 323: Acquiring Language: Tomasello vs. Chomsky (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-323-acquiring-87940925"
+      },
+      {
+        "title": "Ep. 323: Acquiring Language: Tomasello vs. Chomsky (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-323-acquiring-87940921"
+      }
+    ]
+  },
+  {
+    "id": "berkeley",
+    "name": "George Berkeley",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/berkeley/",
+    "dependencies": [
+      "locke"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 89: Berkeley: Only Ideas Exist! (w/ Wes Intro)",
+        "link": "https://www.patreon.com/posts/ep-89-berkeley-w-30345726"
+      }
+    ]
+  },
+  {
+    "id": "mencius",
+    "name": "Mengzi (Mencius)",
+    "category": "Eastern",
+    "sep_link": "https://plato.stanford.edu/entries/mencius/",
+    "dependencies": [
+      "confucius"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 315: Mengzi (Mencius) on Virtuous Leaders (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-315-mengzi-on-81552256"
+      },
+      {
+        "title": "Ep. 315: Mengzi (Mencius) on Virtuous Leaders (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-315-mengzi-on-81552261"
+      },
+      {
+        "title": "Ep. 314: Mengzi (Mencius) on Moral Psychology (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-314-mengzi-on-80925051"
+      },
+      {
+        "title": "Ep. 314: Mengzi (Mencius) on Moral Psychology (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-314-mengzi-on-80925047"
+      }
+    ]
+  },
+  {
+    "id": "weil",
+    "name": "Simone Weil",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/simone-weil/",
+    "dependencies": [
+      "plato",
+      "marx",
+      "kant"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 251: Simone Weil\u2019s Ideal Society",
+        "link": "https://www.patreon.com/posts/ep-251-simone-41347888"
+      },
+      {
+        "title": "Ep. 250: Simone Weil on Human Needs (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-250-simone-on-40580721"
+      },
+      {
+        "title": "Ep. 225: Simone Weil on War and Oppression (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-225-simone-on-29832703"
+      }
+    ]
+  },
+  {
+    "id": "railton",
+    "name": "Peter Railton",
+    "category": "Ethics",
+    "sep_link": "https://plato.stanford.edu/entries/naturalism-moral/",
+    "dependencies": [
+      "hume"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Wrap Up)",
+        "link": "https://www.patreon.com/posts/closereads-peter-137009218"
+      },
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Part Seven)",
+        "link": "https://www.patreon.com/posts/closereads-peter-136437340"
+      },
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Part Six)",
+        "link": "https://www.patreon.com/posts/closereads-peter-135800157"
+      },
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Part Five)",
+        "link": "https://www.patreon.com/posts/closereads-peter-135319463"
+      },
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Part Four)",
+        "link": "https://www.patreon.com/posts/closereads-peter-134712443"
+      },
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-peter-103968354"
+      },
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-peter-103574068"
+      },
+      {
+        "title": "Closereads: Peter Railton's \"Moral Realism\" (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-peter-103100534"
+      }
+    ]
+  },
+  {
+    "id": "butler",
+    "name": "Judith Butler",
+    "category": "Feminist Phil",
+    "sep_link": "https://plato.stanford.edu/entries/feminist-body/",
+    "dependencies": [
+      "foucault",
+      "derrida"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 236: Judith Butler Interview: \u201cThe Force of Nonviolence\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-236-judith-of-34326434"
+      },
+      {
+        "title": "Ep. 235: Judith Butler\u2019s \u201cGender Trouble\u201d (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-235-judith-33741772"
+      }
+    ]
+  },
+  {
+    "id": "plotinus",
+    "name": "Plotinus",
+    "category": "Ancient",
+    "sep_link": "https://plato.stanford.edu/entries/plotinus/",
+    "dependencies": [
+      "plato"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Plotinus on The Intelligence (Audio Part Three)",
+        "link": "https://www.patreon.com/posts/closereads-on-107479619"
+      },
+      {
+        "title": "Closereads: Plotinus on The Intelligence (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-on-107120865"
+      }
+    ]
+  },
+  {
+    "id": "rorty",
+    "name": "Richard Rorty",
+    "category": "Pragmatism",
+    "sep_link": "https://plato.stanford.edu/entries/rorty/",
+    "dependencies": [
+      "dewey",
+      "wittgenstein",
+      "heidegger"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 350: Rorty on Justification and Essentialism (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-350-rorty-on-112017723"
+      },
+      {
+        "title": "Ep. 350: Rorty on Justification and Essentialism (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-350-rorty-on-112017169"
+      },
+      {
+        "title": "Ep. 155: Richard Rorty Against Epistemology (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-155-richard-50993013"
+      },
+      {
+        "title": "Ep. 153: Richard Rorty: There Is No Mind-Body Problem (Citizen Edition)",
+        "link": "https://www.patreon.com/posts/ep-153-richard-50992799"
+      },
+      {
+        "title": "Ep. 193 Follow-Up: Strauss and Rorty on Liberal Education and Democracy (Citizens Only)",
+        "link": "https://www.patreon.com/posts/ep-193-follow-up-19816979"
+      }
+    ]
+  },
+  {
+    "id": "lacan",
+    "name": "Jacques Lacan",
+    "category": "Psychoanalysis",
+    "sep_link": "https://plato.stanford.edu/entries/lacan/",
+    "dependencies": [
+      "freud",
+      "hegel"
+    ],
+    "episodes": [
+      {
+        "title": "Ep. 74: Jacques Lacan\u2019s Psychology",
+        "link": "https://www.patreon.com/posts/ep-74-jacques-17046792"
+      }
+    ]
+  },
+  {
+    "id": "hobbes",
+    "name": "Thomas Hobbes",
+    "category": "Modern",
+    "sep_link": "https://plato.stanford.edu/entries/hobbes/",
+    "dependencies": [
+      "machiavelli"
+    ],
+    "episodes": [
+      {
+        "title": "Closereads: Hobbes on Liberty (Audio)",
+        "link": "https://www.patreon.com/posts/closereads-on-141375538"
+      },
+      {
+        "title": "Closereads: Reason in Hobbes' \"Leviathan\" (Audio Part Three + Reflections)",
+        "link": "https://www.patreon.com/posts/closereads-in-88449843"
+      },
+      {
+        "title": "Closereads: Reason in Hobbes' \"Leviathan\" (Audio Part Two)",
+        "link": "https://www.patreon.com/posts/closereads-in-88233750"
+      },
+      {
+        "title": "Closereads: Reason in Hobbes' \"Leviathan\" (Audio Part One)",
+        "link": "https://www.patreon.com/posts/closereads-in-88081987"
+      },
+      {
+        "title": "Ep. 3: Hobbes\u2019s Leviathan: The Social Contract",
+        "link": "https://www.patreon.com/posts/ep-3-hobbess-30313074"
+      }
+    ]
+  },
+  {
+    "id": "ficino",
+    "name": "Marsilio Ficino",
+    "category": "Renaissance",
+    "sep_link": "https://plato.stanford.edu/entries/ficino/",
+    "dependencies": [
+      "plato",
+      "plotinus"
+    ],
+    "episodes": [
+      {
+        "title": "PEL Ficino-Flavored Nightcap Early August 2022",
+        "link": "https://www.patreon.com/posts/pel-ficino-early-69885424"
+      },
+      {
+        "title": "Ep. 298: Marsilio Ficino on Love (Part Two for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-298-marsilio-69472051"
+      },
+      {
+        "title": "Ep. 298: Marsilio Ficino on Love (Part One for Supporters)",
+        "link": "https://www.patreon.com/posts/ep-298-marsilio-69472045"
+      }
+    ]
+  }
+];
+
+    // --- Process Data for D3 ---
+    // We need nodes and links.
+    // Nodes: The objects in rawData.
+    // Links: Created from 'dependencies'.
+
+    const nodes = rawData.map(d => ({ ...d }));
+    const links = [];
+    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+
+    nodes.forEach(sourceNode => {
+        if (sourceNode.dependencies) {
+            sourceNode.dependencies.forEach(targetId => {
+                if (nodeMap.has(targetId)) {
+                    links.push({ source: sourceNode.id, target: targetId });
+                }
+            });
+        }
+    });
+
+    // --- D3 Visualization ---
+    const width = document.getElementById('graph-area').clientWidth;
+    const height = document.getElementById('graph-area').clientHeight;
+
+    const svg = d3.select("#graph-area").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .call(d3.zoom().on("zoom", (event) => {
+            g.attr("transform", event.transform);
+        }));
+
+    const g = svg.append("g");
+
+    // Arrowhead marker
+    svg.append("defs").selectAll("marker")
+        .data(["arrow"])
+        .enter().append("marker")
+        .attr("id", d => d)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 25) // Position of arrow relative to node center
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#555");
+
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+        .force("charge", d3.forceManyBody().strength(-400))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collide", d3.forceCollide(30));
+
+    const link = g.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(links)
+        .enter().append("line")
+        .attr("class", "link");
+
+    const node = g.append("g")
+        .attr("class", "nodes")
+        .selectAll("g")
+        .data(nodes)
+        .enter().append("g")
+        .attr("class", "node")
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+
+    node.append("circle")
+        .attr("r", d => 5 + (d.episodes.length * 1.5)) // Size based on episode count
+        .attr("class", d => "cat-" + d.category.replace(/ /g, "_").replace(/&/g,""));
+
+    node.append("text")
+        .attr("dy", -10)
+        .attr("text-anchor", "middle")
+        .text(d => d.name);
+
+    // --- Interaction ---
+    node.on("click", (event, d) => {
+        showDetails(d);
+    });
+
+    function showDetails(d) {
+        const details = document.getElementById("details");
+        let html = `<h2>${d.name}</h2>`;
+        html += `<p><span style="color:#aaa;">Category:</span> ${d.category}</p>`;
+        
+        if (d.sep_link) {
+            html += `<a href="${d.sep_link}" target="_blank" class="sep-link">Stanford Encyclopedia Entry</a>`;
+        }
+
+        if (d.dependencies && d.dependencies.length > 0) {
+            html += `<div id="dependency-list"><strong>Prerequisites/Influences:</strong><br>`;
+            d.dependencies.forEach(depId => {
+                const depName = nodeMap.get(depId) ? nodeMap.get(depId).name : depId;
+                html += `<span class="dep-item" onclick="clickNode('${depId}')">${depName}</span>; `;
+            });
+            html += `</div>`;
+        }
+
+        html += `<h3>Episodes (${d.episodes.length})</h3>`;
+        d.episodes.forEach(ep => {
+            html += `<a href="${ep.link}" target="_blank" class="episode-link">${ep.title}</a>`;
+        });
+
+        details.innerHTML = html;
+    }
+    
+    // Allow clicking dependencies in sidebar to jump to node
+    window.clickNode = function(id) {
+        const target = nodes.find(n => n.id === id);
+        if (target) showDetails(target);
+    };
+
+    // --- Search ---
+    document.getElementById("search").addEventListener("input", function(e) {
+        const term = e.target.value.toLowerCase();
+        node.style("opacity", d => d.name.toLowerCase().includes(term) ? 1 : 0.1);
+        link.style("opacity", d => (d.source.name.toLowerCase().includes(term) || d.target.name.toLowerCase().includes(term)) ? 1 : 0.1);
+    });
+
+    // --- Simulation Update ---
+    simulation.on("tick", () => {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        node
+            .attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+</script>
+
+</body>
+</html>
