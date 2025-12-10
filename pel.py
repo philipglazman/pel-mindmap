@@ -3,9 +3,8 @@ import json
 import re
 import os
 
-# --- PHASE 1: RESEARCHED KNOWLEDGE BASE ---
-# This dictionary contains the "intelligence" about philosophers, their categories,
-# links, and historical dependencies.
+# --- PHASE 1: CORE KNOWLEDGE BASE (Manually Curated) ---
+# We keep this for high-quality metadata (SEP links, Dependencies)
 KNOWLEDGE_BASE = {
     # --- Ancient ---
     "presocratics": {"name": "Pre-Socratics", "category": "Ancient", "sep": "https://plato.stanford.edu/entries/presocratics/", "deps": [], "keywords": ["Heraclitus", "Parmenides", "Thales", "Empedocles", "Zeno"]},
@@ -147,8 +146,15 @@ KNOWLEDGE_BASE = {
     "benjamin": {"name": "Walter Benjamin", "category": "Critical Theory", "sep": "https://plato.stanford.edu/entries/benjamin/", "deps": ["marx"], "keywords": ["Benjamin"]},
 }
 
-# Add a default "uncategorized" key for unmatched items
-KNOWLEDGE_BASE["uncategorized"] = {"name": "Uncategorized", "category": "Other", "sep": None, "deps": [], "keywords": []}
+# --- PHASE 2: GENERIC BUCKETS ---
+# These catch generic titles if no specific philosopher is found.
+TOPIC_BUCKETS = {
+    "interview": {"keywords": ["Interview", "Guest"], "category": "Interviews"},
+    "nightcap": {"keywords": ["Nightcap", "Postshow"], "category": "Casual Discussion"},
+    "audiobook": {"keywords": ["Audiobook"], "category": "Readings"},
+    "film": {"keywords": ["Film", "Movie", "Cinema"], "category": "Film"},
+    "general": {"keywords": [], "category": "General Philosophy"} # Fallback
+}
 
 def normalize(text):
     return text.lower() if text else ""
@@ -163,27 +169,50 @@ def parse_rss_feed(filename):
         return []
 
     episodes = []
-    # Namespaces can be tricky. Usually items are in channel/item.
-    # We will try a few paths.
     items = root.findall('.//item')
-    
     print(f"Found {len(items)} items in XML.")
 
     for item in items:
         title = item.find('title').text if item.find('title') is not None else "No Title"
         link = item.find('link').text if item.find('link') is not None else "#"
-        # Optional: Parse description for more keywords if needed, but title is usually enough for PEL
         episodes.append({'title': title, 'link': link})
     
     return episodes
 
-def categorize_episodes(episodes, db):
-    """Maps episodes to the Knowledge Base."""
+def infer_subject_from_title(title):
+    """
+    Intelligent extraction: tries to find "Name" in "Ep X: Name on Topic"
+    """
+    # Pattern 1: "Ep. 123: [Name] on [Topic]" or "Ep. 123: [Name]'s [Book]"
+    # We look for capitalized words immediately following the colon or start
     
-    # Initialize the output structure
+    # Clean title of "Ep. 123:" prefix
+    clean_title = re.sub(r'^Ep\.?\s*\d+[:\.]?\s*', '', title)
+    clean_title = re.sub(r'^Closereads:?\s*', '', clean_title)
+    
+    # Heuristic 1: Look for "X on Y" pattern
+    on_match = re.search(r'^(.*?) on ', clean_title)
+    if on_match:
+        potential_name = on_match.group(1).strip()
+        if len(potential_name.split()) <= 3: # Avoid long phrases
+            return potential_name
+
+    # Heuristic 2: Look for "X's Y" pattern (e.g. "Hegel's Logic")
+    possessive_match = re.search(r'^(.*?)\'s ', clean_title)
+    if possessive_match:
+        potential_name = possessive_match.group(1).strip()
+        if len(potential_name.split()) <= 3:
+            return potential_name
+
+    return None
+
+def categorize_episodes(episodes, db):
+    """Maps episodes to the Knowledge Base or Creates Dynamic Nodes."""
+    
     output_data = {}
+    
+    # Initialize hardcoded nodes
     for key, info in db.items():
-        if key == "uncategorized": continue
         output_data[key] = {
             "id": key,
             "name": info['name'],
@@ -193,62 +222,85 @@ def categorize_episodes(episodes, db):
             "episodes": []
         }
     
-    unmapped = []
-    mapped_count = 0
+    # Add bucket nodes
+    for key, info in TOPIC_BUCKETS.items():
+        output_data[key] = {
+            "id": key,
+            "name": info['category'],
+            "category": "Topic",
+            "sep_link": None,
+            "dependencies": [],
+            "episodes": []
+        }
 
+    mapped_count = 0
+    
     for ep in episodes:
-        title_lower = normalize(ep['title'])
+        title = ep['title']
+        title_lower = normalize(title)
         matched = False
         
-        # Check against every philosopher in the DB
+        # 1. Try Hardcoded DB
         for key, info in db.items():
-            if key == "uncategorized": continue
             for keyword in info['keywords']:
-                # Simple keyword matching: checks if keyword is in title
                 if normalize(keyword) in title_lower:
                     output_data[key]['episodes'].append(ep)
                     matched = True
-                    break # Stop checking keywords for this philosopher
-            if matched: break # Stop checking philosophers for this episode (primary match)
+                    break
+            if matched: break
         
+        # 2. Dynamic Inference (The Smart Fix)
         if not matched:
-            # Try to catch some common variations or generic topics if not in DB
-            # For now, add to unmapped
-            unmapped.append(ep)
-        else:
-            mapped_count += 1
-            
-    # Remove empty nodes (philosophers with no episodes) to keep the graph clean?
-    # Or keep them if they are dependencies? 
-    # Better to keep them if they are dependencies of active nodes, but for now let's keep only nodes with episodes OR valid dependencies
-    # To simplify, we will keep all nodes that have episodes, plus any nodes that are listed as dependencies of those nodes.
-    
+            inferred_name = infer_subject_from_title(title)
+            if inferred_name:
+                # Create a specific ID for this person
+                node_id = normalize(inferred_name).replace(" ", "_")
+                
+                # If node doesn't exist, create it dynamically
+                if node_id not in output_data:
+                    output_data[node_id] = {
+                        "id": node_id,
+                        "name": inferred_name,
+                        "category": "Inferred", # Visual distinction
+                        "sep_link": None,
+                        "dependencies": [],
+                        "episodes": []
+                    }
+                output_data[node_id]['episodes'].append(ep)
+                matched = True
+
+        # 3. Topic Buckets
+        if not matched:
+            for key, info in TOPIC_BUCKETS.items():
+                if key == "general": continue
+                for keyword in info['keywords']:
+                    if normalize(keyword) in title_lower:
+                        output_data[key]['episodes'].append(ep)
+                        matched = True
+                        break
+                if matched: break
+
+        # 4. Fallback
+        if not matched:
+            output_data['general']['episodes'].append(ep)
+        
+        mapped_count += 1
+
+    # Cleanup: Remove nodes with 0 episodes unless they are dependencies
     active_keys = set()
     for key, data in output_data.items():
         if data['episodes']:
             active_keys.add(key)
             for dep in data['dependencies']:
-                if dep in db: # Only add if it exists in our DB
+                if dep in output_data: 
                     active_keys.add(dep)
     
-    final_json = []
-    for key in active_keys:
-        # For dependency-only nodes (no episodes found), ensure they exist in structure
-        if key not in output_data:
-             # This happens if a dependency is in DB but didn't have its own entry init (shouldn't happen with code above)
-             pass
-        final_json.append(output_data[key])
+    final_json = [output_data[key] for key in active_keys]
 
     # Report
     print(f"Total Episodes Processed: {len(episodes)}")
-    print(f"Successfully Mapped: {mapped_count}")
-    print(f"Unmapped: {len(unmapped)}")
+    print(f"General/Misc bucket size: {len(output_data['general']['episodes'])}")
     
-    if len(unmapped) > 0:
-        print("\n--- Unmapped Episodes (First 10) ---")
-        for ep in unmapped[:10]:
-            print(ep['title'])
-            
     return final_json
 
 def generate_html(json_data):
@@ -300,9 +352,15 @@ def generate_html(json_data):
         .cat-Eastern {{ fill: #5f27cd; }}
         .cat-Topic {{ fill: #c8d6e5; }}
         .cat-Literature {{ fill: #8395a7; }}
+        .cat-Inferred {{ fill: #a55eea; }} /* Purple for auto-discovered */
+        .cat-Other {{ fill: #777; }}
 
         #dependency-list {{ margin-top: 15px; font-size: 0.9em; color: #aaa; }}
         .dep-item {{ color: #61dafb; cursor: pointer; }}
+        
+        .legend {{ position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; font-size: 0.8em; }}
+        .legend-item {{ display: flex; align-items: center; margin: 2px 0; }}
+        .legend-color {{ width: 12px; height: 12px; margin-right: 5px; border-radius: 50%; }}
     </style>
 </head>
 <body>
@@ -317,17 +375,19 @@ def generate_html(json_data):
             <p><i>Click a node to view episodes and details.</i></p>
         </div>
     </div>
-    <div id="graph-area"></div>
+    <div id="graph-area">
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background:#ff9f43"></div>Ancient</div>
+            <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div>Modern</div>
+            <div class="legend-item"><div class="legend-color" style="background:#00d2d3"></div>Continental</div>
+            <div class="legend-item"><div class="legend-color" style="background:#54a0ff"></div>Analytic</div>
+            <div class="legend-item"><div class="legend-color" style="background:#a55eea"></div>Inferred/Guest</div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // --- Data Injection ---
     const rawData = {json_str};
-
-    // --- Process Data for D3 ---
-    // We need nodes and links.
-    // Nodes: The objects in rawData.
-    // Links: Created from 'dependencies'.
 
     const nodes = rawData.map(d => ({{ ...d }}));
     const links = [];
@@ -343,7 +403,6 @@ def generate_html(json_data):
         }}
     }});
 
-    // --- D3 Visualization ---
     const width = document.getElementById('graph-area').clientWidth;
     const height = document.getElementById('graph-area').clientHeight;
 
@@ -356,13 +415,12 @@ def generate_html(json_data):
 
     const g = svg.append("g");
 
-    // Arrowhead marker
     svg.append("defs").selectAll("marker")
         .data(["arrow"])
         .enter().append("marker")
         .attr("id", d => d)
         .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 25) // Position of arrow relative to node center
+        .attr("refX", 25)
         .attr("refY", 0)
         .attr("markerWidth", 6)
         .attr("markerHeight", 6)
@@ -396,7 +454,7 @@ def generate_html(json_data):
             .on("end", dragended));
 
     node.append("circle")
-        .attr("r", d => 5 + (d.episodes.length * 1.5)) // Size based on episode count
+        .attr("r", d => 5 + (Math.min(d.episodes.length, 10) * 1.5))
         .attr("class", d => "cat-" + d.category.replace(/ /g, "_").replace(/&/g,""));
 
     node.append("text")
@@ -404,10 +462,7 @@ def generate_html(json_data):
         .attr("text-anchor", "middle")
         .text(d => d.name);
 
-    // --- Interaction ---
-    node.on("click", (event, d) => {{
-        showDetails(d);
-    }});
+    node.on("click", (event, d) => {{ showDetails(d); }});
 
     function showDetails(d) {{
         const details = document.getElementById("details");
@@ -435,47 +490,26 @@ def generate_html(json_data):
         details.innerHTML = html;
     }}
     
-    // Allow clicking dependencies in sidebar to jump to node
     window.clickNode = function(id) {{
         const target = nodes.find(n => n.id === id);
         if (target) showDetails(target);
     }};
 
-    // --- Search ---
     document.getElementById("search").addEventListener("input", function(e) {{
         const term = e.target.value.toLowerCase();
         node.style("opacity", d => d.name.toLowerCase().includes(term) ? 1 : 0.1);
         link.style("opacity", d => (d.source.name.toLowerCase().includes(term) || d.target.name.toLowerCase().includes(term)) ? 1 : 0.1);
     }});
 
-    // --- Simulation Update ---
     simulation.on("tick", () => {{
-        link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-
-        node
-            .attr("transform", d => `translate(${{d.x}},${{d.y}})`);
+        link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+        node.attr("transform", d => `translate(${{d.x}},${{d.y}})`);
     }});
 
-    function dragstarted(event, d) {{
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
-    }}
-
-    function dragged(event, d) {{
-        d.fx = event.x;
-        d.fy = event.y;
-    }}
-
-    function dragended(event, d) {{
-        if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
-    }}
+    function dragstarted(event, d) {{ if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }}
+    function dragged(event, d) {{ d.fx = event.x; d.fy = event.y; }}
+    function dragended(event, d) {{ if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }}
 </script>
 
 </body>
@@ -486,7 +520,6 @@ def generate_html(json_data):
         f.write(html_content)
     print("Successfully created index.html")
 
-# --- Main Execution ---
 if __name__ == "__main__":
     file_name = "pel.xml"
     if not os.path.exists(file_name):
