@@ -1,80 +1,619 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Philosophy Podcast Mind Map</title>
+    <title>PEL Philosophy Mindmap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #1a1a1a; color: #f0f0f0; margin: 0; overflow: hidden; }
-        #container { display: flex; height: 100vh; }
-        #sidebar { width: 350px; background-color: #2c2c2c; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.5); overflow-y: auto; z-index: 10; }
-        #graph-area { flex-grow: 1; position: relative; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        h1 { font-size: 1.2em; color: #61dafb; margin-top: 0; }
-        h2 { font-size: 1.5em; border-bottom: 1px solid #444; padding-bottom: 10px; }
-        
-        .episode-link { display: block; margin: 5px 0; color: #ddd; text-decoration: none; padding: 5px; background: #3a3a3a; border-radius: 4px; }
-        .episode-link:hover { background: #505050; color: #fff; }
-        
-        .sep-link { display: inline-block; margin-top: 10px; color: #ff6b6b; font-weight: bold; text-decoration: none; }
-        .sep-link:hover { text-decoration: underline; }
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #faf5ff 0%, #f5f0ff 50%, #fff0f5 100%);
+            min-height: 100vh;
+            color: #1a1a2e;
+        }
 
-        .search-container { margin-bottom: 20px; }
-        input[type="text"] { width: 100%; padding: 10px; border-radius: 4px; border: none; background: #444; color: white; }
-        
-        .node circle { stroke: #fff; stroke-width: 1.5px; cursor: pointer; transition: all 0.3s; }
-        .node:hover circle { stroke: #61dafb; stroke-width: 3px; r: 25 !important; }
-        .node text { font: 10px sans-serif; pointer-events: none; fill: #eee; text-shadow: 1px 1px 2px #000; }
-        
-        .link { fill: none; stroke: #555; stroke-opacity: 0.6; marker-end: url(#arrow); }
-        
+        /* Header */
+        header {
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.1);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #7c3aed;
+            letter-spacing: -0.5px;
+        }
+
+        .logo p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 40px;
+        }
+
+        .search-box {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 50px;
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .search-box svg {
+            width: 20px;
+            height: 20px;
+            color: #9ca3af;
+            margin-right: 12px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            color: #374151;
+            background: transparent;
+        }
+
+        .search-box input::placeholder {
+            color: #9ca3af;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 50px;
+            padding: 4px;
+        }
+
+        .view-toggle button {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-toggle button.active {
+            background: #7c3aed;
+            color: white;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+        }
+
+        .view-toggle button:hover:not(.active) {
+            color: #374151;
+        }
+
+        /* Main Content */
+        main {
+            padding: 30px 40px;
+        }
+
+        /* Category Filters */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+            justify-content: center;
+        }
+
+        .filter-chip {
+            padding: 10px 20px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            border-color: #7c3aed;
+            color: #7c3aed;
+        }
+
+        .filter-chip.active {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            color: white;
+        }
+
+        /* Results Count */
+        .results-info {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        /* List View */
+        #list-view {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .philosopher-card {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .philosopher-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            padding: 20px 24px;
+            cursor: pointer;
+        }
+
+        .philosopher-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .philosopher-info {
+            flex: 1;
+        }
+
+        .philosopher-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .philosopher-category {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .card-toggle {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            transition: transform 0.2s ease;
+        }
+
+        .philosopher-card.expanded .card-toggle {
+            transform: rotate(180deg);
+        }
+
+        .card-content {
+            display: none;
+            padding: 0 24px 24px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .philosopher-card.expanded .card-content {
+            display: block;
+        }
+
+        .card-section {
+            margin-top: 16px;
+        }
+
+        .card-section-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .sep-link {
+            display: inline-flex;
+            align-items: center;
+            color: #7c3aed;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .sep-link:hover {
+            text-decoration: underline;
+        }
+
+        .sep-link svg {
+            width: 16px;
+            height: 16px;
+            margin-left: 6px;
+        }
+
+        .dependencies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .dep-tag {
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dep-tag:hover {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .episode-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .episode-list.scrollable {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .episode-list.scrollable::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .episode-list.scrollable::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 3px;
+        }
+
+        .episode-list.scrollable::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        .episode-list.scrollable::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        .episode-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            background: #faf5ff;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #374151;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .episode-item:hover {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .episode-item svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            color: #7c3aed;
+        }
+
+        /* Mindmap View */
+        #mindmap-view {
+            display: none;
+            height: calc(100vh - 180px);
+            position: relative;
+        }
+
+        #mindmap-view.active {
+            display: block;
+        }
+
+        #list-view.hidden {
+            display: none;
+        }
+
+        #graph-container {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #faf5ff 0%, #f8f0ff 50%, #fff5f8 100%);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .mindmap-sidebar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+
+        .mindmap-sidebar h3 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .mindmap-sidebar p {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .sidebar-episode-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 6px;
+        }
+
+        .sidebar-episode-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar-episode-list::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 3px;
+        }
+
+        .sidebar-episode-list::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        .sidebar-episode-list::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        .sidebar-episode-item {
+            display: block;
+            padding: 8px 10px;
+            background: #faf5ff;
+            border-radius: 8px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar-episode-item:hover {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .mindmap-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .legend-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        /* D3 Node Styles */
+        .node circle {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            stroke: white;
+            stroke-width: 3px;
+        }
+
+        .node:hover circle {
+            filter: brightness(1.1);
+            transform: scale(1.1);
+        }
+
+        .node text {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            fill: #374151;
+            pointer-events: none;
+        }
+
+        .link {
+            stroke: #d8b4fe;
+            stroke-opacity: 0.4;
+            stroke-width: 1.5px;
+        }
+
         /* Category Colors */
-        .cat-Ancient { fill: #ff9f43; }
-        .cat-Medieval { fill: #feca57; }
-        .cat-Modern { fill: #ff6b6b; }
-        .cat-19th_Century { fill: #ff9ff3; }
-        .cat-Analytic { fill: #54a0ff; }
-        .cat-Continental { fill: #00d2d3; }
-        .cat-Phenomenology { fill: #1dd1a1; }
-        .cat-Existentialism { fill: #10ac84; }
-        .cat-Eastern { fill: #5f27cd; }
-        .cat-Topic { fill: #c8d6e5; }
-        .cat-Literature { fill: #8395a7; }
-        .cat-Inferred { fill: #a55eea; } /* Purple for auto-discovered */
-        .cat-Other { fill: #777; }
+        .cat-Ancient { fill: #f59e0b; }
+        .cat-Medieval { fill: #eab308; }
+        .cat-Modern { fill: #ef4444; }
+        .cat-19th_Century { fill: #a855f7; }
+        .cat-Analytic { fill: #3b82f6; }
+        .cat-Continental { fill: #14b8a6; }
+        .cat-Phenomenology { fill: #22c55e; }
+        .cat-Existentialism { fill: #10b981; }
+        .cat-Eastern { fill: #8b5cf6; }
+        .cat-Topic { fill: #64748b; }
+        .cat-Literature { fill: #78716c; }
+        .cat-Inferred { fill: #a855f7; }
+        .cat-Other { fill: #94a3b8; }
+        .cat-Ethics { fill: #ec4899; }
+        .cat-Political_Phil { fill: #f43f5e; }
+        .cat-Feminist_Phil { fill: #e879f9; }
+        .cat-Phil_of_Mind { fill: #06b6d4; }
+        .cat-Phil_of_Science { fill: #0ea5e9; }
+        .cat-Pragmatism { fill: #f97316; }
+        .cat-Psychoanalysis { fill: #84cc16; }
+        .cat-Critical_Theory { fill: #dc2626; }
+        .cat-Post-Structuralism { fill: #7c3aed; }
+        .cat-Process_Phil { fill: #0d9488; }
+        .cat-Naturalism { fill: #65a30d; }
+        .cat-Neo-Kantian { fill: #6366f1; }
+        .cat-Aesthetics { fill: #d946ef; }
+        .cat-Renaissance { fill: #ca8a04; }
 
-        #dependency-list { margin-top: 15px; font-size: 0.9em; color: #aaa; }
-        .dep-item { color: #61dafb; cursor: pointer; }
-        
-        .legend { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; font-size: 0.8em; }
-        .legend-item { display: flex; align-items: center; margin: 2px 0; }
-        .legend-color { width: 12px; height: 12px; margin-right: 5px; border-radius: 50%; }
+        /* Selected node highlight */
+        .node.selected circle {
+            stroke: #7c3aed;
+            stroke-width: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px 20px;
+            }
+
+            .search-container {
+                margin: 0;
+                max-width: 100%;
+            }
+
+            main {
+                padding: 20px;
+            }
+
+            .mindmap-sidebar {
+                position: relative;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin-bottom: 16px;
+                border-radius: 12px;
+            }
+        }
     </style>
 </head>
 <body>
-
-<div id="container">
-    <div id="sidebar">
-        <h1>PEL Mind Map</h1>
+    <header>
+        <div class="logo">
+            <h1>PEL Philosophy Mindmap</h1>
+            <p>Explore philosophical ideas interactively</p>
+        </div>
         <div class="search-container">
-            <input type="text" id="search" placeholder="Search philosopher or topic...">
+            <div class="search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" id="search" placeholder="Search philosophers, topics, episodes...">
+            </div>
         </div>
-        <div id="details">
-            <p><i>Click a node to view episodes and details.</i></p>
+        <div class="view-toggle">
+            <button id="mindmap-btn">Mindmap</button>
+            <button id="list-btn" class="active">List</button>
         </div>
-    </div>
-    <div id="graph-area">
-        <div class="legend">
-            <div class="legend-item"><div class="legend-color" style="background:#ff9f43"></div>Ancient</div>
-            <div class="legend-item"><div class="legend-color" style="background:#ff6b6b"></div>Modern</div>
-            <div class="legend-item"><div class="legend-color" style="background:#00d2d3"></div>Continental</div>
-            <div class="legend-item"><div class="legend-color" style="background:#54a0ff"></div>Analytic</div>
-            <div class="legend-item"><div class="legend-color" style="background:#a55eea"></div>Inferred/Guest</div>
+    </header>
+
+    <main>
+        <div class="filters" id="filters"></div>
+        <div class="results-info" id="results-info"></div>
+
+        <div id="list-view"></div>
+
+        <div id="mindmap-view">
+            <div id="graph-container"></div>
+            <div class="mindmap-sidebar">
+                <h3>How to use</h3>
+                <p>Click bubbles to explore, use +/- to zoom, and search to find specific philosophers or topics.</p>
+            </div>
+            <div class="mindmap-legend">
+                <div class="legend-title">Categories</div>
+                <div class="legend-item"><div class="legend-color" style="background:#f59e0b"></div>Ancient</div>
+                <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div>Modern</div>
+                <div class="legend-item"><div class="legend-color" style="background:#14b8a6"></div>Continental</div>
+                <div class="legend-item"><div class="legend-color" style="background:#3b82f6"></div>Analytic</div>
+                <div class="legend-item"><div class="legend-color" style="background:#a855f7"></div>Inferred/Guest</div>
+            </div>
         </div>
-    </div>
-</div>
+    </main>
 
 <script>
     const rawData = [
@@ -5127,128 +5666,355 @@
   }
 ];
 
-    const nodes = rawData.map(d => ({ ...d }));
-    const links = [];
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
-
-    nodes.forEach(sourceNode => {
-        if (sourceNode.dependencies) {
-            sourceNode.dependencies.forEach(targetId => {
-                if (nodeMap.has(targetId)) {
-                    links.push({ source: sourceNode.id, target: targetId });
-                }
-            });
-        }
-    });
-
-    const width = document.getElementById('graph-area').clientWidth;
-    const height = document.getElementById('graph-area').clientHeight;
-
-    const svg = d3.select("#graph-area").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .call(d3.zoom().on("zoom", (event) => {
-            g.attr("transform", event.transform);
-        }));
-
-    const g = svg.append("g");
-
-    svg.append("defs").selectAll("marker")
-        .data(["arrow"])
-        .enter().append("marker")
-        .attr("id", d => d)
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 25)
-        .attr("refY", 0)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
-        .attr("orient", "auto")
-        .append("path")
-        .attr("d", "M0,-5L10,0L0,5")
-        .attr("fill", "#555");
-
-    const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(100))
-        .force("charge", d3.forceManyBody().strength(-400))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide(30));
-
-    const link = g.append("g")
-        .attr("class", "links")
-        .selectAll("line")
-        .data(links)
-        .enter().append("line")
-        .attr("class", "link");
-
-    const node = g.append("g")
-        .attr("class", "nodes")
-        .selectAll("g")
-        .data(nodes)
-        .enter().append("g")
-        .attr("class", "node")
-        .call(d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended));
-
-    node.append("circle")
-        .attr("r", d => 5 + (Math.min(d.episodes.length, 10) * 1.5))
-        .attr("class", d => "cat-" + d.category.replace(/ /g, "_").replace(/&/g,""));
-
-    node.append("text")
-        .attr("dy", -10)
-        .attr("text-anchor", "middle")
-        .text(d => d.name);
-
-    node.on("click", (event, d) => { showDetails(d); });
-
-    function showDetails(d) {
-        const details = document.getElementById("details");
-        let html = `<h2>${d.name}</h2>`;
-        html += `<p><span style="color:#aaa;">Category:</span> ${d.category}</p>`;
-        
-        if (d.sep_link) {
-            html += `<a href="${d.sep_link}" target="_blank" class="sep-link">Stanford Encyclopedia Entry</a>`;
-        }
-
-        if (d.dependencies && d.dependencies.length > 0) {
-            html += `<div id="dependency-list"><strong>Prerequisites/Influences:</strong><br>`;
-            d.dependencies.forEach(depId => {
-                const depName = nodeMap.get(depId) ? nodeMap.get(depId).name : depId;
-                html += `<span class="dep-item" onclick="clickNode('${depId}')">${depName}</span>; `;
-            });
-            html += `</div>`;
-        }
-
-        html += `<h3>Episodes (${d.episodes.length})</h3>`;
-        d.episodes.forEach(ep => {
-            html += `<a href="${ep.link}" target="_blank" class="episode-link">${ep.title}</a>`;
-        });
-
-        details.innerHTML = html;
-    }
+    // Extract unique categories
+    const categories = [...new Set(rawData.map(d => d.category))].sort();
     
-    window.clickNode = function(id) {
-        const target = nodes.find(n => n.id === id);
-        if (target) showDetails(target);
+    // Color mapping for categories
+    const categoryColors = {
+        'Ancient': '#f59e0b',
+        'Medieval': '#eab308',
+        'Modern': '#ef4444',
+        '19th Century': '#a855f7',
+        'Analytic': '#3b82f6',
+        'Continental': '#14b8a6',
+        'Phenomenology': '#22c55e',
+        'Existentialism': '#10b981',
+        'Eastern': '#8b5cf6',
+        'Topic': '#64748b',
+        'Literature': '#78716c',
+        'Inferred': '#a855f7',
+        'Ethics': '#ec4899',
+        'Political Phil': '#f43f5e',
+        'Feminist Phil': '#e879f9',
+        'Phil of Mind': '#06b6d4',
+        'Phil of Science': '#0ea5e9',
+        'Pragmatism': '#f97316',
+        'Psychoanalysis': '#84cc16',
+        'Critical Theory': '#dc2626',
+        'Post-Structuralism': '#7c3aed',
+        'Process Phil': '#0d9488',
+        'Naturalism': '#65a30d',
+        'Neo-Kantian': '#6366f1',
+        'Aesthetics': '#d946ef',
+        'Renaissance': '#ca8a04'
     };
 
-    document.getElementById("search").addEventListener("input", function(e) {
-        const term = e.target.value.toLowerCase();
-        node.style("opacity", d => d.name.toLowerCase().includes(term) ? 1 : 0.1);
-        link.style("opacity", d => (d.source.name.toLowerCase().includes(term) || d.target.name.toLowerCase().includes(term)) ? 1 : 0.1);
+    function getCategoryColor(cat) {
+        return categoryColors[cat] || '#94a3b8';
+    }
+
+    // State
+    let currentView = 'list';
+    let selectedCategory = 'All';
+    let searchTerm = '';
+    let simulation = null;
+
+    // Generate filters
+    function generateFilters() {
+        const filtersContainer = document.getElementById('filters');
+        const mainCategories = ['All', 'Ancient', 'Modern', 'Continental', 'Analytic', 'Existentialism', 
+                                'Phenomenology', 'Eastern', 'Ethics', 'Political Phil', 'Pragmatism', 
+                                '19th Century', 'Phil of Mind', 'Phil of Science'];
+        
+        mainCategories.forEach(cat => {
+            const chip = document.createElement('button');
+            chip.className = 'filter-chip' + (cat === selectedCategory ? ' active' : '');
+            chip.textContent = cat === 'All' ? 'All' : cat;
+            chip.onclick = () => {
+                selectedCategory = cat;
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                renderList();
+                if (simulation) updateMindmapFilter();
+            };
+            filtersContainer.appendChild(chip);
+        });
+    }
+
+    // Filter data
+    function getFilteredData() {
+        return rawData.filter(d => {
+            const matchesCategory = selectedCategory === 'All' || d.category === selectedCategory;
+            const matchesSearch = searchTerm === '' || 
+                d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                d.episodes.some(ep => ep.title.toLowerCase().includes(searchTerm.toLowerCase()));
+            return matchesCategory && matchesSearch;
+        });
+    }
+
+    // Render list view
+    function renderList() {
+        const container = document.getElementById('list-view');
+        const filtered = getFilteredData();
+        
+        document.getElementById('results-info').textContent = `Showing ${filtered.length} results`;
+
+        // Sort by episode count (descending)
+        filtered.sort((a, b) => b.episodes.length - a.episodes.length);
+
+        container.innerHTML = filtered.map(item => `
+            <div class="philosopher-card" data-id="${item.id}">
+                <div class="card-header" onclick="toggleCard('${item.id}')">
+                    <div class="philosopher-icon" style="background: ${getCategoryColor(item.category)}20">
+                        <div style="width: 24px; height: 24px; background: ${getCategoryColor(item.category)}; border-radius: 50%;"></div>
+                    </div>
+                    <div class="philosopher-info">
+                        <div class="philosopher-name">${item.name}</div>
+                        <div class="philosopher-category">${item.category}${item.episodes.length > 0 ? ' · ' + item.episodes.length + ' episode' + (item.episodes.length !== 1 ? 's' : '') : ''}</div>
+                    </div>
+                    <div class="card-toggle">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="card-content">
+                    ${item.sep_link ? `
+                        <div class="card-section">
+                            <a href="${item.sep_link}" target="_blank" class="sep-link">
+                                Stanford Encyclopedia Entry
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </div>
+                    ` : ''}
+                    ${item.dependencies && item.dependencies.length > 0 ? `
+                        <div class="card-section">
+                            <div class="card-section-title">Prerequisites / Influences</div>
+                            <div class="dependencies">
+                                ${item.dependencies.map(depId => {
+                                    const dep = rawData.find(d => d.id === depId);
+                                    return dep ? `<span class="dep-tag" onclick="scrollToCard('${depId}')">${dep.name}</span>` : '';
+                                }).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${item.episodes.length > 0 ? `
+                        <div class="card-section">
+                            <div class="card-section-title">Episodes (${item.episodes.length})</div>
+                            <div class="episode-list scrollable">
+                                ${item.episodes.map(ep => `
+                                    <a href="${ep.link}" target="_blank" class="episode-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        ${ep.title}
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleCard(id) {
+        const card = document.querySelector(`.philosopher-card[data-id="${id}"]`);
+        card.classList.toggle('expanded');
+    }
+
+    function scrollToCard(id) {
+        // First make sure this philosopher's card is visible by clearing filters
+        selectedCategory = 'All';
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        document.querySelector('.filter-chip').classList.add('active');
+        renderList();
+        
+        setTimeout(() => {
+            const card = document.querySelector(`.philosopher-card[data-id="${id}"]`);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('expanded');
+            }
+        }, 100);
+    }
+
+    // Initialize mindmap
+    function initMindmap() {
+        const container = document.getElementById('graph-container');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+
+        const nodes = rawData.map(d => ({ ...d }));
+        const links = [];
+        const nodeMap = new Map(nodes.map(n => [n.id, n]));
+
+        nodes.forEach(sourceNode => {
+            if (sourceNode.dependencies) {
+                sourceNode.dependencies.forEach(targetId => {
+                    if (nodeMap.has(targetId)) {
+                        links.push({ source: sourceNode.id, target: targetId });
+                    }
+                });
+            }
+        });
+
+        const svg = d3.select("#graph-container").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .call(d3.zoom().scaleExtent([0.2, 4]).on("zoom", (event) => {
+                g.attr("transform", event.transform);
+            }));
+
+        const g = svg.append("g");
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const boundaryRadius = Math.min(width, height) * 0.45;
+
+        simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id).distance(100).strength(0.3))
+            .force("charge", d3.forceManyBody().strength(-250).distanceMax(400))
+            .force("center", d3.forceCenter(centerX, centerY))
+            .force("collide", d3.forceCollide().radius(d => 12 + Math.min(d.episodes.length, 10) * 1.5).strength(0.8))
+            .force("x", d3.forceX(centerX).strength(0.03))
+            .force("y", d3.forceY(centerY).strength(0.03));
+
+        const link = g.append("g")
+            .selectAll("line")
+            .data(links)
+            .enter().append("line")
+            .attr("class", "link");
+
+        const node = g.append("g")
+            .selectAll("g")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        node.append("circle")
+            .attr("r", d => 8 + Math.min(d.episodes.length, 10) * 1.5)
+            .attr("class", d => "cat-" + d.category.replace(/ /g, "_").replace(/&/g, ""))
+            .style("fill", d => getCategoryColor(d.category));
+
+        node.append("text")
+            .attr("dy", d => -(12 + Math.min(d.episodes.length, 10) * 1.5))
+            .attr("text-anchor", "middle")
+            .text(d => d.name);
+
+        node.on("click", (event, d) => {
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            showMindmapDetails(d);
+        });
+
+        simulation.on("tick", () => {
+            // Soft boundary - gently push nodes back if they drift too far
+            nodes.forEach(d => {
+                const dx = d.x - centerX;
+                const dy = d.y - centerY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > boundaryRadius) {
+                    const pushBack = (dist - boundaryRadius) * 0.1;
+                    d.vx -= (dx / dist) * pushBack;
+                    d.vy -= (dy / dist) * pushBack;
+                }
+            });
+
+            link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+
+        function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
+        function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
+        function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }
+
+        window.mindmapNodes = node;
+        window.mindmapLinks = link;
+    }
+
+    function showMindmapDetails(d) {
+        const sidebar = document.querySelector('.mindmap-sidebar');
+        sidebar.innerHTML = `
+            <h3>${d.name}</h3>
+            <p style="margin-bottom: 12px; color: #7c3aed;">${d.category}</p>
+            ${d.sep_link ? `<a href="${d.sep_link}" target="_blank" class="sep-link" style="margin-bottom: 16px; display: inline-block;">Stanford Encyclopedia →</a>` : ''}
+            ${d.dependencies && d.dependencies.length > 0 ? `
+                <div style="margin-top: 16px;">
+                    <div style="font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; margin-bottom: 8px;">Influences</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        ${d.dependencies.map(depId => {
+                            const dep = rawData.find(x => x.id === depId);
+                            return dep ? `<span class="dep-tag">${dep.name}</span>` : '';
+                        }).join('')}
+                    </div>
+                </div>
+            ` : ''}
+            ${d.episodes.length > 0 ? `
+                <div style="margin-top: 16px;">
+                    <div style="font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; margin-bottom: 8px;">Episodes (${d.episodes.length})</div>
+                    <div class="sidebar-episode-list">
+                        ${d.episodes.map(ep => `
+                            <a href="${ep.link}" target="_blank" class="sidebar-episode-item">${ep.title}</a>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        `;
+    }
+
+    function updateMindmapFilter() {
+        if (!window.mindmapNodes) return;
+        const term = searchTerm.toLowerCase();
+        
+        window.mindmapNodes.style("opacity", d => {
+            const matchesCat = selectedCategory === 'All' || d.category === selectedCategory;
+            const matchesSearch = term === '' || d.name.toLowerCase().includes(term);
+            return (matchesCat && matchesSearch) ? 1 : 0.1;
+        });
+        
+        window.mindmapLinks.style("opacity", d => {
+            const sourceMatch = (selectedCategory === 'All' || d.source.category === selectedCategory) && 
+                               (term === '' || d.source.name.toLowerCase().includes(term));
+            const targetMatch = (selectedCategory === 'All' || d.target.category === selectedCategory) && 
+                               (term === '' || d.target.name.toLowerCase().includes(term));
+            return (sourceMatch || targetMatch) ? 0.4 : 0.05;
+        });
+    }
+
+    // View switching
+    document.getElementById('mindmap-btn').onclick = () => {
+        currentView = 'mindmap';
+        document.getElementById('mindmap-btn').classList.add('active');
+        document.getElementById('list-btn').classList.remove('active');
+        document.getElementById('list-view').classList.add('hidden');
+        document.getElementById('mindmap-view').classList.add('active');
+        document.querySelector('.filters').style.display = 'none';
+        document.getElementById('results-info').style.display = 'none';
+        
+        if (!simulation) {
+            setTimeout(initMindmap, 100);
+        }
+    };
+
+    document.getElementById('list-btn').onclick = () => {
+        currentView = 'list';
+        document.getElementById('list-btn').classList.add('active');
+        document.getElementById('mindmap-btn').classList.remove('active');
+        document.getElementById('list-view').classList.remove('hidden');
+        document.getElementById('mindmap-view').classList.remove('active');
+        document.querySelector('.filters').style.display = 'flex';
+        document.getElementById('results-info').style.display = 'block';
+    };
+
+    // Search
+    document.getElementById('search').addEventListener('input', (e) => {
+        searchTerm = e.target.value;
+        renderList();
+        if (simulation) updateMindmapFilter();
     });
 
-    simulation.on("tick", () => {
-        link.attr("x1", d => d.source.x).attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
-        node.attr("transform", d => `translate(${d.x},${d.y})`);
-    });
-
-    function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
-    function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
-    function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }
+    // Initialize
+    generateFilters();
+    renderList();
 </script>
-
 </body>
 </html>
